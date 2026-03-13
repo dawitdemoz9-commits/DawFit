@@ -9,6 +9,7 @@ import { ArrowLeft, Dumbbell, ClipboardList, CheckSquare, MessageSquare } from "
 import { ClientStatusActions } from "@/components/coach/client-status-actions";
 import { ReviewCheckInDialog } from "@/components/coach/review-check-in-dialog";
 import { AdaptiveSuggestionsPanel } from "@/components/coach/adaptive-suggestions-panel";
+import { TransformationStudio } from "@/components/coach/transformation-studio";
 import type { AdaptiveAnalysisOutput } from "@/lib/ai/adaptive-prompts";
 
 interface Props {
@@ -43,6 +44,8 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
     { data: allPrograms },
     { data: aiDrafts },
     { data: adaptiveSuggestions },
+    { data: transformation },
+    { data: coach },
   ] = await Promise.all([
     supabase
       .from("program_assignments")
@@ -84,6 +87,16 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
       .eq("coach_id", user.id)
       .order("created_at", { ascending: false })
       .limit(30),
+    supabase
+      .from("transformations")
+      .select("id, before_photo_url, after_photo_url, testimonial, share_token, is_public")
+      .eq("client_id", id)
+      .maybeSingle(),
+    supabase
+      .from("coaches")
+      .select("slug")
+      .eq("id", user.id)
+      .single(),
   ]);
 
   const tabs = [
@@ -92,6 +105,7 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
     { key: "logs", label: "Workout Logs" },
     { key: "checkins", label: "Check-ins" },
     { key: "ai", label: "AI Suggestions" },
+    { key: "transformation", label: "Transformation" },
   ];
 
   const existingDrafts = (aiDrafts ?? []).map(d => ({
@@ -343,6 +357,16 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
               pendingSuggestions={pendingSuggestions}
             />
           </div>
+        )}
+
+        {tab === "transformation" && (
+          <TransformationStudio
+            clientId={id}
+            clientName={profile?.full_name ?? "Client"}
+            coachSlug={coach?.slug ?? ""}
+            appUrl={process.env.NEXT_PUBLIC_APP_URL ?? "https://dawfit.app"}
+            existing={transformation ?? null}
+          />
         )}
       </div>
     </div>
