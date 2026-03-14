@@ -1,52 +1,24 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const PUBLIC_ROUTES = ["/", "/pricing", "/auth/login", "/auth/signup", "/auth/callback", "/auth/reset-password"];
-const APPLY_ROUTE_PATTERN = /^\/apply\//;
-const COACH_ROUTES = /^\/dashboard/;
-const CLIENT_ROUTES = /^\/client/;
+const PROTECTED_ROUTES = /^\/(dashboard|client)/;
+const PUBLIC_ROUTES = /^\/(auth|apply|api|_next|favicon|pricing|compare|features|t\/)/;
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (
-    PUBLIC_ROUTES.includes(pathname) ||
-    APPLY_ROUTE_PATTERN.test(pathname) ||
-    pathname.startsWith("/api/leads") ||
-    pathname.startsWith("/api/webhooks") ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon")
-  ) {
+  // Skip public routes entirely
+  if (PUBLIC_ROUTES.test(pathname) || pathname === "/" || pathname === "/pricing") {
     return NextResponse.next({ request });
   }
 
-  const { supabaseResponse, user, supabase } = await updateSession(request);
+  // Refresh Supabase session and check auth for protected routes
+  const { supabaseResponse, user } = await updateSession(request);
 
-  if (!user) {
+  if (!user && PROTECTED_ROUTES.test(pathname)) {
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(loginUrl);
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  const role = profile?.role;
-
-  if (role === "coach" && CLIENT_ROUTES.test(pathname)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  if (role === "client" && COACH_ROUTES.test(pathname)) {
-    return NextResponse.redirect(new URL("/client", request.url));
-  }
-
-  if (pathname === "/") {
-    if (role === "coach") return NextResponse.redirect(new URL("/dashboard", request.url));
-    if (role === "client") return NextResponse.redirect(new URL("/client", request.url));
   }
 
   return supabaseResponse;
