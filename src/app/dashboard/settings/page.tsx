@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CreditCard, ChevronRight } from "lucide-react";
+import { CopyLeadLink } from "@/app/dashboard/leads/copy-lead-link";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -16,6 +17,9 @@ export default async function SettingsPage() {
     .eq("id", user.id)
     .single();
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://dawfit.app";
+  const applyLink = coach?.slug ? `${appUrl}/apply/${coach.slug}` : null;
+
   return (
     <div className="p-6 space-y-6 max-w-2xl">
       <div>
@@ -27,12 +31,29 @@ export default async function SettingsPage() {
           <CardTitle className="text-base">Your Application Page</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-slate-600 mb-2">Share this link to capture leads:</p>
-          <div className="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-2">
-            <span className="text-sm font-mono text-primary">
-              {process.env.NEXT_PUBLIC_APP_URL ?? "https://dawfit.app"}/apply/{coach?.slug}
-            </span>
-          </div>
+          {applyLink ? (
+            <>
+              <p className="text-sm text-slate-600 mb-2">Share this link to capture leads:</p>
+              <div className="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-2">
+                <a
+                  href={applyLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-mono text-indigo-600 hover:underline flex-1 truncate"
+                >
+                  {appUrl}/apply/{coach.slug}
+                </a>
+                <CopyLeadLink url={applyLink} />
+              </div>
+            </>
+          ) : (
+            <div className="text-sm text-slate-500">
+              <p>Your apply link will appear here once you complete onboarding.</p>
+              <Link href="/onboarding" className="text-indigo-600 hover:underline text-sm mt-1 inline-block">
+                Complete onboarding →
+              </Link>
+            </div>
+          )}
         </CardContent>
       </Card>
       <Card>

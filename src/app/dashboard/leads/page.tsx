@@ -70,7 +70,7 @@ export default async function LeadsPage({ searchParams }: Props) {
           <h1 className="text-2xl font-bold text-slate-900">Leads</h1>
           <p className="text-slate-500 text-sm">{activeLeads?.length ?? 0} active</p>
         </div>
-        {applyLink && (
+        {applyLink ? (
           <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-2 text-sm min-w-0">
             <span className="text-slate-500 flex-shrink-0">Apply link:</span>
             <a
@@ -83,6 +83,13 @@ export default async function LeadsPage({ searchParams }: Props) {
             </a>
             <CopyLeadLink url={applyLink} />
           </div>
+        ) : (
+          <Link
+            href="/onboarding"
+            className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm text-amber-700 hover:bg-amber-100 transition-colors"
+          >
+            Complete onboarding to get your apply link →
+          </Link>
         )}
       </div>
 
@@ -117,7 +124,7 @@ export default async function LeadsPage({ searchParams }: Props) {
               <p className="text-slate-400 text-sm mt-1 max-w-sm">
                 Share your /apply link on social media or your website — applications land here automatically.
               </p>
-              {applyLink && (
+              {applyLink ? (
                 <a
                   href={applyLink}
                   target="_blank"
@@ -126,6 +133,13 @@ export default async function LeadsPage({ searchParams }: Props) {
                 >
                   View Apply Page
                 </a>
+              ) : (
+                <Link
+                  href="/onboarding"
+                  className="mt-5 inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  Complete onboarding to get your apply link →
+                </Link>
               )}
             </div>
           ) : (
