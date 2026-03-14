@@ -2,10 +2,17 @@
 
 import { useEffect } from "react";
 
-// Client-side page that handles Supabase auth tokens delivered as URL hash fragments
-// (#access_token=...) which server-side Route Handlers can't read.
 export default function ConfirmPage() {
   useEffect(() => {
+    // Must have an auth token in the URL hash to proceed
+    const hash = window.location.hash;
+    const hasToken = hash.includes("access_token") || hash.includes("token_hash");
+
+    if (!hasToken) {
+      window.location.replace("/auth/login");
+      return;
+    }
+
     async function handle() {
       const { createBrowserClient } = await import("@supabase/ssr");
       const supabase = createBrowserClient(
@@ -13,10 +20,8 @@ export default function ConfirmPage() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
 
-      // Sign out any existing session so we don't accidentally update the wrong account
-      await supabase.auth.signOut();
-
-      // Wait for the new session to be established from the hash token
+      // Supabase auto-processes the hash token when the client is created.
+      // Listen for the resulting auth event.
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (session && (event === "SIGNED_IN" || event === "PASSWORD_RECOVERY" || event === "USER_UPDATED")) {
           subscription.unsubscribe();
@@ -24,11 +29,11 @@ export default function ConfirmPage() {
         }
       });
 
-      // Timeout fallback — if no session after 5s, go to login
+      // Fallback: if no event fires in 6s the link is expired
       setTimeout(() => {
         subscription.unsubscribe();
-        window.location.replace("/auth/login?error=Link expired or already used. Request a new one.");
-      }, 5000);
+        window.location.replace("/auth/login?error=Link expired. Request a new one.");
+      }, 6000);
     }
 
     handle();
