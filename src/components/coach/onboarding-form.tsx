@@ -8,6 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+const SPECIALTIES = [
+  { value: "strength", label: "Strength & Powerlifting", emoji: "🏋️" },
+  { value: "bodybuilding", label: "Bodybuilding / Physique", emoji: "💪" },
+  { value: "crossfit", label: "CrossFit / Functional", emoji: "⚡" },
+  { value: "general", label: "General Fitness", emoji: "🎯" },
+  { value: "cardio", label: "Cardio / Endurance", emoji: "🏃" },
+];
+
 const BRAND_COLORS = [
   "#3B82F6", // Blue
   "#8B5CF6", // Violet
@@ -31,10 +39,12 @@ function SubmitButton() {
 export function OnboardingForm({ defaultName }: { defaultName: string }) {
   const [error, setError] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState(BRAND_COLORS[0]);
+  const [selectedSpecialty, setSelectedSpecialty] = useState("general");
 
   async function handleAction(formData: FormData) {
     setError(null);
     formData.set("brand_color", selectedColor);
+    formData.set("specialty", selectedSpecialty);
     const result = await completeOnboarding(formData);
     if (result?.error) {
       setError(result.error);
@@ -79,6 +89,29 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
           placeholder="Tell potential clients about your coaching philosophy, experience, and specialties..."
           rows={4}
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Coaching specialty</Label>
+        <p className="text-xs text-slate-400">We&apos;ll seed your exercise library with relevant exercises</p>
+        <div className="grid grid-cols-1 gap-2">
+          {SPECIALTIES.map((s) => (
+            <button
+              key={s.value}
+              type="button"
+              onClick={() => setSelectedSpecialty(s.value)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-sm font-medium transition-colors text-left ${
+                selectedSpecialty === s.value
+                  ? "border-blue-500 bg-blue-50 text-blue-700"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+              }`}
+            >
+              <span className="text-lg">{s.emoji}</span>
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <input type="hidden" name="specialty" value={selectedSpecialty} />
       </div>
 
       <div className="space-y-2">

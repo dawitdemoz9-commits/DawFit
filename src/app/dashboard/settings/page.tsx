@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { CreditCard, ChevronRight } from "lucide-react";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -41,6 +44,24 @@ export default async function SettingsPage() {
           <p className="text-xs text-slate-400 mt-3">Full settings editor coming in Phase 10</p>
         </CardContent>
       </Card>
+
+      {/* Billing */}
+      <Link href="/dashboard/settings/billing">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 rounded-lg bg-indigo-50">
+                <CreditCard className="h-5 w-5 text-indigo-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-slate-900 text-sm">Billing & Plans</p>
+                <p className="text-xs text-slate-400 mt-0.5">Manage your subscription, upgrade or downgrade your plan</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-400 flex-shrink-0" />
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
     </div>
   );
 }

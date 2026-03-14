@@ -12,7 +12,6 @@ export default async function MessagesPage() {
     .select("role")
     .eq("id", user.id)
     .single();
-  if (profile?.role !== "coach") redirect("/client/messages");
 
   // Load all conversations this coach has, with client profile + unread count
   const { data: conversations } = await supabase

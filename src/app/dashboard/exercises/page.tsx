@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExerciseSearch } from "@/components/coach/exercise-search";
-import { Plus, Dumbbell } from "lucide-react";
+import { BulkExerciseDialog } from "@/components/coach/bulk-exercise-dialog";
+import { Plus, Dumbbell, Sparkles } from "lucide-react";
 
 const CATEGORIES = ["strength", "cardio", "core", "mobility", "plyometrics", "other"];
 
@@ -51,12 +52,15 @@ export default async function ExercisesPage({ searchParams }: Props) {
             {myCount} custom · {platformCount} platform defaults
           </p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/exercises/new">
-            <Plus className="h-4 w-4 mr-2" />
-            New Exercise
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <BulkExerciseDialog />
+          <Button asChild>
+            <Link href="/dashboard/exercises/new">
+              <Plus className="h-4 w-4 mr-2" />
+              New Exercise
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <ExerciseSearch categories={CATEGORIES} />
@@ -65,12 +69,25 @@ export default async function ExercisesPage({ searchParams }: Props) {
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <Dumbbell className="h-12 w-12 text-slate-300 mb-4" />
           <h2 className="text-lg font-semibold text-slate-700">No exercises found</h2>
-          <p className="text-slate-400 text-sm mt-1">Try a different search or add a custom exercise</p>
-          <Button className="mt-4" asChild>
-            <Link href="/dashboard/exercises/new">
-              <Plus className="h-4 w-4 mr-2" />Add Exercise
-            </Link>
-          </Button>
+          <p className="text-slate-400 text-sm mt-1 max-w-sm">
+            {q || category
+              ? "Try a different search or filter."
+              : "Build your library fast — let AI generate exercises by category, or add them manually."}
+          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-3 mt-5">
+            <BulkExerciseDialog />
+            <Button variant="outline" asChild>
+              <Link href="/dashboard/exercises/new">
+                <Plus className="h-4 w-4 mr-2" />Add Manually
+              </Link>
+            </Button>
+          </div>
+          {!q && !category && (
+            <p className="text-slate-300 text-xs mt-4 flex items-center gap-1">
+              <Sparkles className="h-3 w-3" />
+              Tip: AI can generate 10–50 exercises at once by category and focus
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">

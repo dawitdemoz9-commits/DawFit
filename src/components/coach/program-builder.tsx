@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Plus, Trash2, ChevronDown, Dumbbell, Clock, ExternalLink, GripVertical } from "lucide-react";
+import { Plus, Trash2, ChevronDown, Dumbbell, Clock, ExternalLink, GripVertical, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import {
   removeWorkoutFromWeek,
   deleteWeek,
   updateWeek,
+  copyWorkoutToWeek,
 } from "@/app/dashboard/programs/actions";
 import type { Program } from "@/types/database";
 
@@ -35,21 +36,31 @@ interface WorkoutRow {
   estimated_duration_min: number | null;
 }
 
+interface LibraryWorkout {
+  id: string;
+  title: string;
+  estimated_duration_min: number | null;
+  status: "draft" | "published";
+}
+
 interface ProgramBuilderProps {
   program: Program;
   weeks: Week[];
   workouts: WorkoutRow[];
   exerciseCountMap: Record<string, number>;
+  libraryWorkouts: LibraryWorkout[];
 }
 
-export function ProgramBuilder({ program, weeks: initialWeeks, workouts: initialWorkouts, exerciseCountMap }: ProgramBuilderProps) {
+export function ProgramBuilder({ program, weeks: initialWeeks, workouts: initialWorkouts, exerciseCountMap, libraryWorkouts }: ProgramBuilderProps) {
   const [weeks, setWeeks] = useState<Week[]>(initialWeeks);
   const [workouts, setWorkouts] = useState<WorkoutRow[]>(initialWorkouts);
   const [expandedWeeks, setExpandedWeeks] = useState<Set<string>>(
     new Set(initialWeeks.slice(0, 3).map(w => w.id)) // Open first 3 weeks by default
   );
   const [addingWorkoutWeek, setAddingWorkoutWeek] = useState<string | null>(null);
+  const [addMode, setAddMode] = useState<"new" | "library">("new");
   const [newWorkoutTitle, setNewWorkoutTitle] = useState("");
+  const [librarySearch, setLibrarySearch] = useState("");
   const [isPending, startTransition] = useTransition();
 
   function toggleWeek(weekId: string) {
@@ -98,6 +109,29 @@ export function ProgramBuilder({ program, weeks: initialWeeks, workouts: initial
 
     startTransition(async () => {
       const result = await addWorkoutToWeek(weekId, program.id, title);
+      if (result?.data) {
+        setWorkouts(prev => prev.map(w => w.id === tempId ? result.data : w));
+      }
+    });
+  }
+
+  function handleCopyFromLibrary(libraryWorkout: LibraryWorkout, weekId: string) {
+    setAddingWorkoutWeek(null);
+    setLibrarySearch("");
+
+    const tempId = `temp-${Date.now()}`;
+    setWorkouts(prev => [...prev, {
+      id: tempId,
+      title: libraryWorkout.title,
+      week_id: weekId,
+      day_of_week: null,
+      order_index: workouts.filter(w => w.week_id === weekId).length,
+      status: "draft",
+      estimated_duration_min: libraryWorkout.estimated_duration_min,
+    }]);
+
+    startTransition(async () => {
+      const result = await copyWorkoutToWeek(libraryWorkout.id, weekId, program.id);
       if (result?.data) {
         setWorkouts(prev => prev.map(w => w.id === tempId ? result.data : w));
       }
@@ -211,20 +245,73 @@ export function ProgramBuilder({ program, weeks: initialWeeks, workouts: initial
 
                   {/* Add workout inline */}
                   {addingWorkoutWeek === week.id ? (
-                    <div className="flex gap-2 mt-1">
-                      <Input
-                        autoFocus
-                        value={newWorkoutTitle}
-                        onChange={e => setNewWorkoutTitle(e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === "Enter") handleAddWorkout(week.id);
-                          if (e.key === "Escape") { setAddingWorkoutWeek(null); setNewWorkoutTitle(""); }
-                        }}
-                        placeholder="Workout name, e.g. Upper Body A..."
-                        className="h-8 text-sm"
-                      />
-                      <Button size="sm" className="h-8 text-xs" onClick={() => handleAddWorkout(week.id)}>Add</Button>
-                      <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => { setAddingWorkoutWeek(null); setNewWorkoutTitle(""); }}>
+                    <div className="mt-1 border rounded-lg bg-white p-2 space-y-2">
+                      {/* Mode toggle */}
+                      <div className="flex gap-1 bg-slate-100 rounded-md p-0.5">
+                        <button
+                          onClick={() => setAddMode("new")}
+                          className={`flex-1 text-xs py-1 rounded transition-colors font-medium ${addMode === "new" ? "bg-white shadow-sm text-slate-800" : "text-slate-500"}`}
+                        >
+                          New workout
+                        </button>
+                        <button
+                          onClick={() => setAddMode("library")}
+                          className={`flex-1 text-xs py-1 rounded transition-colors font-medium ${addMode === "library" ? "bg-white shadow-sm text-slate-800" : "text-slate-500"}`}
+                        >
+                          From library {libraryWorkouts.length > 0 && `(${libraryWorkouts.length})`}
+                        </button>
+                      </div>
+
+                      {addMode === "new" ? (
+                        <div className="flex gap-2">
+                          <Input
+                            autoFocus
+                            value={newWorkoutTitle}
+                            onChange={e => setNewWorkoutTitle(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === "Enter") handleAddWorkout(week.id);
+                              if (e.key === "Escape") { setAddingWorkoutWeek(null); setNewWorkoutTitle(""); }
+                            }}
+                            placeholder="Workout name, e.g. Upper Body A..."
+                            className="h-8 text-sm"
+                          />
+                          <Button size="sm" className="h-8 text-xs" onClick={() => handleAddWorkout(week.id)}>Add</Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <div className="relative">
+                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400" />
+                            <Input
+                              autoFocus
+                              value={librarySearch}
+                              onChange={e => setLibrarySearch(e.target.value)}
+                              placeholder="Search library..."
+                              className="h-7 text-xs pl-6"
+                            />
+                          </div>
+                          <div className="max-h-36 overflow-y-auto space-y-0.5">
+                            {libraryWorkouts
+                              .filter(w => w.title.toLowerCase().includes(librarySearch.toLowerCase()))
+                              .map(w => (
+                                <button
+                                  key={w.id}
+                                  onClick={() => handleCopyFromLibrary(w, week.id)}
+                                  className="w-full text-left px-2 py-1.5 rounded hover:bg-slate-50 text-xs text-slate-700 flex items-center justify-between"
+                                >
+                                  <span className="font-medium">{w.title}</span>
+                                  {w.estimated_duration_min && (
+                                    <span className="text-slate-400">{w.estimated_duration_min}m</span>
+                                  )}
+                                </button>
+                              ))}
+                            {libraryWorkouts.length === 0 && (
+                              <p className="text-slate-400 text-xs text-center py-3">No workouts in library yet</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <Button size="sm" variant="ghost" className="h-6 text-xs w-full text-slate-400" onClick={() => { setAddingWorkoutWeek(null); setNewWorkoutTitle(""); setLibrarySearch(""); }}>
                         Cancel
                       </Button>
                     </div>

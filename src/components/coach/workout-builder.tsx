@@ -12,6 +12,7 @@ import {
   removeExerciseFromWorkout,
   reorderWorkoutExercises,
   updateWorkoutMeta,
+  createExerciseQuick,
 } from "@/app/dashboard/workouts/actions";
 import type { Workout } from "@/types/database";
 
@@ -51,6 +52,7 @@ export function WorkoutBuilder({ workout, initialExercises, allExercises }: Work
   const [exercises, setExercises] = useState<ExerciseRow[]>(initialExercises);
   const [showPicker, setShowPicker] = useState(false);
   const [pickerSearch, setPickerSearch] = useState("");
+  const [creatingExercise, setCreatingExercise] = useState(false);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [publishStatus, setPublishStatus] = useState(workout.status);
@@ -60,6 +62,19 @@ export function WorkoutBuilder({ workout, initialExercises, allExercises }: Work
       e.name.toLowerCase().includes(pickerSearch.toLowerCase()) ||
       (e.category ?? "").toLowerCase().includes(pickerSearch.toLowerCase())
   );
+
+  function handleCreateAndAdd() {
+    if (!pickerSearch.trim() || creatingExercise) return;
+    const name = pickerSearch.trim();
+    setCreatingExercise(true);
+    startTransition(async () => {
+      const created = await createExerciseQuick(name);
+      if (created) {
+        handleAddExercise({ id: created.id, name: created.name, category: created.category, muscle_groups: created.muscle_groups });
+      }
+      setCreatingExercise(false);
+    });
+  }
 
   function handleAddExercise(exercise: ExerciseOption) {
     const newRow: ExerciseRow = {
@@ -206,26 +221,37 @@ export function WorkoutBuilder({ workout, initialExercises, allExercises }: Work
             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-2">
-            {filteredExercises.length === 0 ? (
-              <p className="text-slate-400 text-sm text-center py-8">No results</p>
-            ) : (
-              filteredExercises.map((ex) => (
-                <button
-                  key={ex.id}
-                  onClick={() => handleAddExercise(ex)}
-                  className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  <p className="text-sm font-medium text-slate-800">{ex.name}</p>
-                  <div className="flex gap-1 mt-0.5">
-                    {ex.category && (
-                      <span className="text-xs text-slate-400 capitalize">{ex.category}</span>
-                    )}
-                    {(ex.muscle_groups ?? []).slice(0, 2).map(m => (
-                      <span key={m} className="text-xs text-slate-300 capitalize">· {m.replace("_", " ")}</span>
-                    ))}
-                  </div>
-                </button>
-              ))
+            {filteredExercises.length === 0 && !pickerSearch && (
+              <p className="text-slate-400 text-sm text-center py-8">Search to find exercises</p>
+            )}
+            {filteredExercises.map((ex) => (
+              <button
+                key={ex.id}
+                onClick={() => handleAddExercise(ex)}
+                className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                <p className="text-sm font-medium text-slate-800">{ex.name}</p>
+                <div className="flex gap-1 mt-0.5">
+                  {ex.category && (
+                    <span className="text-xs text-slate-400 capitalize">{ex.category}</span>
+                  )}
+                  {(ex.muscle_groups ?? []).slice(0, 2).map(m => (
+                    <span key={m} className="text-xs text-slate-300 capitalize">· {m.replace("_", " ")}</span>
+                  ))}
+                </div>
+              </button>
+            ))}
+            {pickerSearch.trim() && (
+              <button
+                onClick={handleCreateAndAdd}
+                disabled={creatingExercise}
+                className="w-full text-left px-3 py-2.5 rounded-lg border border-dashed border-blue-200 hover:bg-blue-50 transition-colors mt-1 flex items-center gap-2"
+              >
+                <Plus className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
+                <span className="text-sm text-blue-600">
+                  {creatingExercise ? "Creating..." : `Create "${pickerSearch.trim()}" and add to library`}
+                </span>
+              </button>
             )}
           </div>
         </div>

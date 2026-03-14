@@ -16,7 +16,7 @@ export default async function ProgramDetailPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const [{ data: program }, { data: weeks }, { data: clients }] = await Promise.all([
+  const [{ data: program }, { data: weeks }, { data: clients }, { data: libraryWorkouts }] = await Promise.all([
     supabase.from("programs").select("*").eq("id", id).eq("coach_id", user.id).single(),
     supabase
       .from("weeks")
@@ -28,6 +28,12 @@ export default async function ProgramDetailPage({ params }: Props) {
       .select("id, status, profiles(full_name)")
       .eq("coach_id", user.id)
       .eq("status", "active"),
+    supabase
+      .from("workouts")
+      .select("id, title, estimated_duration_min, status")
+      .eq("coach_id", user.id)
+      .is("week_id", null)
+      .order("title"),
   ]);
 
   if (!program) notFound();
@@ -93,6 +99,7 @@ export default async function ProgramDetailPage({ params }: Props) {
           weeks={weeks ?? []}
           workouts={allWorkouts ?? []}
           exerciseCountMap={exerciseCountMap}
+          libraryWorkouts={libraryWorkouts ?? []}
         />
       </div>
     </div>

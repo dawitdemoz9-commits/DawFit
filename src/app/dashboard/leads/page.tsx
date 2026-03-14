@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatRelativeTime } from "@/lib/utils";
-import { UserPlus, CopyIcon } from "lucide-react";
+import { UserPlus } from "lucide-react";
+import { CopyLeadLink } from "./copy-lead-link";
 
 interface Props {
   searchParams: Promise<{ view?: string }>;
@@ -202,17 +203,3 @@ export default async function LeadsPage({ searchParams }: Props) {
   );
 }
 
-// Tiny inline copy button — needs to be client
-function CopyLeadLink({ url }: { url: string }) {
-  // Server component trick: use a plain button with onclick for minimal JS
-  return (
-    <button
-      type="button"
-      className="text-slate-400 hover:text-slate-600 flex-shrink-0"
-      onClick={() => navigator.clipboard.writeText(url)}
-      title="Copy link"
-    >
-      <CopyIcon className="w-3.5 h-3.5" />
-    </button>
-  );
-}

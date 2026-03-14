@@ -1,3 +1,4 @@
+import React from "react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
@@ -8,10 +9,11 @@ import { formatRelativeTime } from "@/lib/utils";
 import {
   Users,
   UserPlus,
-  Sparkles,
+  DollarSign,
   TrendingUp,
   ArrowRight,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import { CoachOnboarding, FirstClientBanner } from "@/components/onboarding/coach-onboarding";
 import { DashboardTasks } from "@/components/coach/dashboard-tasks";
@@ -37,6 +39,7 @@ export default async function DashboardPage({
     { count: newLeadCount },
     { count: pendingDraftCount },
     { count: programCount },
+    { count: exerciseCount },
     { data: recentClients },
     { data: recentLeads },
     { data: pendingDrafts },
@@ -47,6 +50,7 @@ export default async function DashboardPage({
     supabase.from("leads").select("*", { count: "exact", head: true }).eq("coach_id", user.id).eq("status", "new"),
     supabase.from("ai_drafts").select("*", { count: "exact", head: true }).eq("coach_id", user.id).eq("status", "pending"),
     supabase.from("programs").select("*", { count: "exact", head: true }).eq("coach_id", user.id),
+    supabase.from("exercises").select("*", { count: "exact", head: true }).or(`coach_id.eq.${user.id},coach_id.is.null`),
     supabase
       .from("clients")
       .select("id, status, profiles(full_name, avatar_url)")
@@ -115,6 +119,7 @@ export default async function DashboardPage({
       icon: Users,
       color: "text-blue-600",
       bg: "bg-blue-50",
+      href: "/dashboard/clients",
     },
     {
       title: "New Leads",
@@ -123,14 +128,7 @@ export default async function DashboardPage({
       icon: UserPlus,
       color: "text-violet-600",
       bg: "bg-violet-50",
-    },
-    {
-      title: "AI Drafts",
-      value: pendingDraftCount ?? 0,
-      sub: "Pending approval",
-      icon: Sparkles,
-      color: "text-amber-600",
-      bg: "bg-amber-50",
+      href: "/dashboard/leads",
     },
     {
       title: "Programs",
@@ -139,6 +137,16 @@ export default async function DashboardPage({
       icon: TrendingUp,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
+      href: "/dashboard/programs",
+    },
+    {
+      title: "Revenue",
+      value: "$0", // TODO Phase 5: replace with Stripe MRR query
+      sub: "Connect Stripe to track",
+      icon: DollarSign,
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      href: "/dashboard/settings",
     },
   ];
 
@@ -176,21 +184,23 @@ export default async function DashboardPage({
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {stats.map(({ title, value, sub, icon: Icon, color, bg }) => (
-          <Card key={title}>
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">{title}</p>
-                  <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{sub}</p>
+        {stats.map(({ title, value, sub, icon: Icon, color, bg, href }: { title: string; value: string | number; sub: string; icon: React.ElementType; color: string; bg: string; href: string }) => (
+          <Link key={title} href={href}>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">{title}</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{sub}</p>
+                  </div>
+                  <div className={`p-2.5 rounded-lg ${bg}`}>
+                    <Icon className={`h-5 w-5 ${color}`} />
+                  </div>
                 </div>
-                <div className={`p-2.5 rounded-lg ${bg}`}>
-                  <Icon className={`h-5 w-5 ${color}`} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 

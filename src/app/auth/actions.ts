@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
+import { sendClientInviteEmail } from "@/lib/email";
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient();
@@ -28,6 +29,9 @@ export async function signUp(formData: FormData) {
   }
 
   if (data.user) {
+    const { createServiceClient } = await import("@/lib/supabase/server");
+    const serviceSupabase = await createServiceClient();
+
     // Create coach record with generated slug
     const baseSlug = slugify(fullName || email.split("@")[0]);
     let slug = baseSlug;
@@ -35,7 +39,7 @@ export async function signUp(formData: FormData) {
 
     // Ensure slug uniqueness
     while (true) {
-      const { data: existing } = await supabase
+      const { data: existing } = await serviceSupabase
         .from("coaches")
         .select("id")
         .eq("slug", slug)
@@ -46,7 +50,13 @@ export async function signUp(formData: FormData) {
       slug = `${baseSlug}-${attempt}`;
     }
 
-    const { error: coachError } = await supabase.from("coaches").insert({
+    await serviceSupabase.from("profiles").upsert({
+      id: data.user.id,
+      role: "coach" as const,
+      full_name: fullName || null,
+    }, { onConflict: "id" });
+
+    const { error: coachError } = await serviceSupabase.from("coaches").insert({
       id: data.user.id,
       slug,
       business_name: fullName,
@@ -160,6 +170,22 @@ export async function inviteClient(formData: FormData) {
     await serviceSupabase.from("conversations").insert({
       coach_id: user.id,
       client_id: invited.user.id,
+    });
+
+    // Send branded welcome email (non-blocking — Supabase sends the magic link separately)
+    const { data: coachProfile } = await serviceSupabase
+      .from("coaches")
+      .select("business_name, profiles(full_name)")
+      .eq("id", user.id)
+      .single();
+    const coachName = (Array.isArray(coachProfile?.profiles) ? coachProfile.profiles[0] : coachProfile?.profiles)?.full_name ?? "Your coach";
+    const coachBusiness = coachProfile?.business_name ?? coachName;
+    await sendClientInviteEmail({
+      to: email,
+      clientName: fullName,
+      coachName,
+      coachBusiness,
+      appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "https://dawfit.app",
     });
   }
 

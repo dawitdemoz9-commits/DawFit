@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { sendLeadConversionEmail } from "@/lib/email";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "converted" | "rejected";
 
@@ -124,6 +125,22 @@ export async function convertLeadToClient(leadId: string) {
     .update({ status: "converted", converted_client_id: clientUserId })
     .eq("id", leadId)
     .eq("coach_id", user.id);
+
+  // Send welcome email (non-blocking — Supabase sends the magic link separately)
+  const { data: coachProfile } = await admin
+    .from("coaches")
+    .select("business_name, profiles(full_name)")
+    .eq("id", user.id)
+    .single();
+  const coachName = (Array.isArray(coachProfile?.profiles) ? coachProfile.profiles[0] : coachProfile?.profiles)?.full_name ?? "Your coach";
+  const coachBusiness = coachProfile?.business_name ?? coachName;
+  await sendLeadConversionEmail({
+    to: lead.email,
+    clientName: lead.full_name ?? "",
+    coachName,
+    coachBusiness,
+    appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "https://dawfit.app",
+  });
 
   revalidatePath("/dashboard/leads");
   redirect(`/dashboard/clients/${clientUserId}`);

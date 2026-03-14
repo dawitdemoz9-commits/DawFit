@@ -210,6 +210,61 @@ export async function assignProgram(formData: FormData) {
   return { success: true };
 }
 
+export async function copyWorkoutToWeek(workoutId: string, weekId: string, programId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const { data: source } = await supabase
+    .from("workouts")
+    .select("*, workout_exercises(*)")
+    .eq("id", workoutId)
+    .eq("coach_id", user.id)
+    .single();
+
+  if (!source) return { error: "Workout not found" };
+
+  const { count } = await supabase
+    .from("workouts")
+    .select("*", { count: "exact", head: true })
+    .eq("week_id", weekId);
+
+  const { data: copy, error } = await supabase.from("workouts").insert({
+    coach_id: user.id,
+    week_id: weekId,
+    title: source.title,
+    description: source.description,
+    day_of_week: source.day_of_week,
+    order_index: count ?? 0,
+    estimated_duration_min: source.estimated_duration_min,
+    status: "draft",
+    is_template: false,
+  }).select().single();
+
+  if (error || !copy) return { error: error?.message ?? "Failed to copy" };
+
+  const srcExercises = Array.isArray(source.workout_exercises) ? source.workout_exercises : [];
+  if (srcExercises.length > 0) {
+    await supabase.from("workout_exercises").insert(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      srcExercises.map((ex: any) => ({
+        workout_id: copy.id,
+        exercise_id: ex.exercise_id,
+        order_index: ex.order_index,
+        sets: ex.sets,
+        reps: ex.reps,
+        load: ex.load,
+        rest_seconds: ex.rest_seconds,
+        tempo: ex.tempo,
+        notes: ex.notes,
+      }))
+    );
+  }
+
+  revalidatePath(`/dashboard/programs/${programId}`);
+  return { data: copy };
+}
+
 export async function deleteProgram(id: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

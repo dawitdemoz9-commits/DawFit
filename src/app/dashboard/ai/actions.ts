@@ -130,8 +130,19 @@ export async function approveProgramDraft(draftId: string) {
       const weInserts = [];
       for (let ei = 0; ei < wo.exercises.length; ei++) {
         const ex = wo.exercises[ei];
-        const exerciseId = resolveExerciseId(ex.exercise_name, nameMap);
-        if (!exerciseId) continue; // skip unresolved exercises (shouldn't happen if prompt is followed)
+        let exerciseId = resolveExerciseId(ex.exercise_name, nameMap);
+
+        if (!exerciseId) {
+          const { data: created } = await supabase
+            .from("exercises")
+            .insert({ coach_id: user.id, name: ex.exercise_name, is_public: false })
+            .select("id")
+            .single();
+          if (created) {
+            exerciseId = created.id;
+            nameMap.set(ex.exercise_name.toLowerCase().trim(), created.id);
+          }
+        }
 
         weInserts.push({
           workout_id: workout.id,
@@ -213,7 +224,21 @@ export async function approveWorkoutDraft(draftId: string) {
   const weInserts = [];
   for (let ei = 0; ei < workoutDraft.exercises.length; ei++) {
     const ex = workoutDraft.exercises[ei];
-    const exerciseId = resolveExerciseId(ex.exercise_name, nameMap);
+    let exerciseId = resolveExerciseId(ex.exercise_name, nameMap);
+
+    if (!exerciseId) {
+      // Auto-create exercise so nothing gets dropped
+      const { data: created } = await supabase
+        .from("exercises")
+        .insert({ coach_id: user.id, name: ex.exercise_name, is_public: false })
+        .select("id")
+        .single();
+      if (created) {
+        exerciseId = created.id;
+        nameMap.set(ex.exercise_name.toLowerCase().trim(), created.id);
+      }
+    }
+
     if (!exerciseId) continue;
     weInserts.push({
       workout_id: workout.id,

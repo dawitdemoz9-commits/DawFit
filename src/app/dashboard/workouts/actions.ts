@@ -126,6 +126,21 @@ export async function reorderWorkoutExercises(workoutId: string, orderedIds: str
   return { success: true };
 }
 
+export async function createExerciseQuick(name: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data } = await supabase
+    .from("exercises")
+    .insert({ coach_id: user.id, name, is_public: false })
+    .select("id, name, category, muscle_groups")
+    .single();
+
+  if (data) revalidatePath("/dashboard/exercises");
+  return data;
+}
+
 export async function deleteWorkout(id: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
