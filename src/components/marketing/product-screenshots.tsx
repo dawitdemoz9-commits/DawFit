@@ -145,7 +145,7 @@ function LeadPipelineMockup() {
         </div>
         {/* Apply link bar */}
         <div className="bg-indigo-50 border border-indigo-200 rounded px-2 py-1 flex items-center justify-between">
-          <span className="text-indigo-600 text-[9px]">dawfit.app/apply/alex-rivera</span>
+          <span className="text-indigo-600 text-[9px]">dawfit.app/apply/austin-rivera</span>
           <div className="h-3.5 w-8 rounded bg-indigo-600 flex items-center justify-center text-[7px] text-white">Copy</div>
         </div>
       </div>

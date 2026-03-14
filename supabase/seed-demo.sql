@@ -33,7 +33,7 @@ INSERT INTO auth.users (
     crypt('DawFitDemo2024!', gen_salt('bf')),
     NOW(), NOW(), NOW(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Alex Rivera"}',
+    '{"full_name":"Austin Rivera"}',
     'authenticated', 'authenticated'
   ),
   -- Client 1
@@ -59,7 +59,7 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 
 INSERT INTO profiles (id, role, full_name) VALUES
-  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'coach', 'Alex Rivera'),
+  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'coach', 'Austin Rivera'),
   ('c0000000-0000-0000-0000-000000000001', 'client', 'Jordan Smith'),
   ('c0000000-0000-0000-0000-000000000002', 'client', 'Maya Chen'),
   ('c0000000-0000-0000-0000-000000000003', 'client', 'Carlos Diaz'),
@@ -77,7 +77,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO coaches (id, slug, business_name, bio, subscription_tier, subscription_status, onboarded_at) VALUES
   (
     'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-    'alex-rivera',
+    'austin-rivera',
     'Rivera Performance',
     'Online strength & conditioning coach specializing in body recomposition and athletic performance.',
     'pro',
