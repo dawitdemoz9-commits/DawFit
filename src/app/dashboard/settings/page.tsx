@@ -41,7 +41,7 @@ export default async function SettingsPage() {
                   rel="noopener noreferrer"
                   className="text-sm font-mono text-indigo-600 hover:underline flex-1 truncate"
                 >
-                  {appUrl}/apply/{coach.slug}
+                  {appUrl}/apply/{coach?.slug}
                 </a>
                 <CopyLeadLink url={applyLink} />
               </div>
