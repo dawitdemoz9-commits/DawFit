@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
 import { signOut } from "@/app/auth/actions";
+import { NotificationBell } from "./notification-bell";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -39,17 +40,23 @@ const navItems = [
 ];
 
 interface SidebarProps {
+  coachId: string;
   coachName: string;
   coachAvatar?: string;
   businessName: string;
   brandColor: string;
+  unreadLeads: number;
+  unreadCheckIns: number;
 }
 
 function SidebarContent({
+  coachId,
   coachName,
   coachAvatar,
   businessName,
   brandColor,
+  unreadLeads,
+  unreadCheckIns,
   onNavClick,
 }: SidebarProps & { onNavClick?: () => void }) {
   const pathname = usePathname();
@@ -108,6 +115,11 @@ function SidebarContent({
             <p className="text-white text-sm font-medium truncate">{coachName}</p>
             <p className="text-slate-400 text-xs">Coach</p>
           </div>
+          <NotificationBell
+            coachId={coachId}
+            initialUnreadLeads={unreadLeads}
+            initialUnreadCheckIns={unreadCheckIns}
+          />
           <form action={signOut}>
             <button
               type="submit"
