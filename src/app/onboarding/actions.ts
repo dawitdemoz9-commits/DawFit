@@ -86,7 +86,19 @@ export async function completeOnboarding(formData: FormData) {
     slug = `${baseSlug}-${attempt}`;
   }
 
-  const { error } = await supabase.from("coaches").upsert({
+  // Use service client so profile upsert works regardless of RLS
+  const { createServiceClient } = await import("@/lib/supabase/server");
+  const serviceSupabase = await createServiceClient();
+
+  // Ensure profile row exists (coaches FK references profiles)
+  const fullName = formData.get("full_name") as string;
+  await serviceSupabase.from("profiles").upsert({
+    id: user.id,
+    role: "coach",
+    full_name: fullName || null,
+  }, { onConflict: "id" });
+
+  const { error } = await serviceSupabase.from("coaches").upsert({
     id: user.id,
     business_name: businessName,
     bio,
@@ -99,12 +111,6 @@ export async function completeOnboarding(formData: FormData) {
 
   if (error) {
     return { error: error.message };
-  }
-
-  // Also update profile full_name if provided
-  const fullName = formData.get("full_name") as string;
-  if (fullName) {
-    await supabase.from("profiles").update({ full_name: fullName }).eq("id", user.id);
   }
 
   // Seed specialty exercises into coach's personal library
