@@ -33,12 +33,14 @@ export default async function ProgramsPage() {
 
       {(!programs || programs.length === 0) ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <ClipboardList className="h-12 w-12 text-slate-300 mb-4" />
-          <h2 className="text-lg font-semibold text-slate-700">No programs yet</h2>
+          <div className="h-16 w-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
+            <ClipboardList className="h-8 w-8 text-indigo-400" />
+          </div>
+          <h2 className="text-lg font-semibold text-slate-800">Create your first training program</h2>
           <p className="text-slate-400 text-sm mt-1 max-w-sm">
-            Build your first multi-week training program and assign it to clients
+            Build a multi-week training program and assign it to clients in minutes.
           </p>
-          <Button className="mt-4" asChild>
+          <Button className="mt-5" asChild>
             <Link href="/dashboard/programs/new"><Plus className="h-4 w-4 mr-2" />Build Program</Link>
           </Button>
         </div>

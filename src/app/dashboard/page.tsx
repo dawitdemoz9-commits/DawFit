@@ -13,6 +13,7 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
+import { CoachOnboarding, FirstClientBanner } from "@/components/onboarding/coach-onboarding";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -25,14 +26,17 @@ export default async function DashboardPage() {
     { count: activeClientCount },
     { count: newLeadCount },
     { count: pendingDraftCount },
+    { count: programCount },
     { data: recentClients },
     { data: recentLeads },
     { data: pendingDrafts },
+    { data: coach },
   ] = await Promise.all([
     supabase.from("clients").select("*", { count: "exact", head: true }).eq("coach_id", user.id),
     supabase.from("clients").select("*", { count: "exact", head: true }).eq("coach_id", user.id).eq("status", "active"),
     supabase.from("leads").select("*", { count: "exact", head: true }).eq("coach_id", user.id).eq("status", "new"),
     supabase.from("ai_drafts").select("*", { count: "exact", head: true }).eq("coach_id", user.id).eq("status", "pending"),
+    supabase.from("programs").select("*", { count: "exact", head: true }).eq("coach_id", user.id),
     supabase
       .from("clients")
       .select("id, status, profiles(full_name, avatar_url)")
@@ -52,7 +56,16 @@ export default async function DashboardPage() {
       .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(3),
+    supabase.from("coaches").select("slug").eq("id", user.id).single(),
   ]);
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://dawfit.app";
+  const hasProgram = (programCount ?? 0) > 0;
+  const hasClient = (clientCount ?? 0) > 0;
+  // Proxy: if coach has both a client and a program, step 3 (assign) is considered done
+  const hasProgramAssigned = hasClient && hasProgram;
+  const firstClient = recentClients?.[recentClients.length - 1] ?? recentClients?.[0] ?? null;
+  const showFirstClientBanner = clientCount === 1 && firstClient;
 
   const stats = [
     {
@@ -80,9 +93,9 @@ export default async function DashboardPage() {
       bg: "bg-amber-50",
     },
     {
-      title: "Active Programs",
-      value: "—",
-      sub: "Assigned this month",
+      title: "Programs",
+      value: programCount ?? 0,
+      sub: "In your library",
       icon: TrendingUp,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
@@ -95,6 +108,20 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
         <p className="text-slate-500 text-sm mt-0.5">Here&apos;s what&apos;s happening across your business</p>
       </div>
+
+      {/* First client success banner */}
+      {showFirstClientBanner && (
+        <FirstClientBanner clientId={firstClient!.id} />
+      )}
+
+      {/* Onboarding progress */}
+      <CoachOnboarding
+        hasProgram={hasProgram}
+        hasClient={hasClient}
+        hasProgramAssigned={hasProgramAssigned}
+        coachSlug={coach?.slug ?? null}
+        appUrl={appUrl}
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">

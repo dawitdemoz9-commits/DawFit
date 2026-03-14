@@ -109,11 +109,23 @@ export default async function LeadsPage({ searchParams }: Props) {
         <>
           {(!activeLeads || activeLeads.length === 0) ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <UserPlus className="h-12 w-12 text-slate-300 mb-4" />
-              <h2 className="text-lg font-semibold text-slate-700">No active leads</h2>
+              <div className="h-16 w-16 rounded-2xl bg-violet-50 flex items-center justify-center mb-4">
+                <UserPlus className="h-8 w-8 text-violet-400" />
+              </div>
+              <h2 className="text-lg font-semibold text-slate-800">Share your application page to start receiving leads</h2>
               <p className="text-slate-400 text-sm mt-1 max-w-sm">
-                Share your application page link to start capturing leads.
+                Share your /apply link on social media or your website — applications land here automatically.
               </p>
+              {applyLink && (
+                <a
+                  href={applyLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  View Apply Page
+                </a>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-4">

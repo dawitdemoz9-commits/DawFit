@@ -30,12 +30,14 @@ export default async function ClientsPage() {
 
       {(!clients || clients.length === 0) ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Users className="h-12 w-12 text-slate-300 mb-4" />
-          <h2 className="text-lg font-semibold text-slate-700">No clients yet</h2>
+          <div className="h-16 w-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+            <Users className="h-8 w-8 text-blue-400" />
+          </div>
+          <h2 className="text-lg font-semibold text-slate-800">Add your first client to start coaching</h2>
           <p className="text-slate-400 text-sm mt-1 max-w-sm">
-            Invite your first client to get started. They&apos;ll receive an email invitation to join your portal.
+            Invite a client by email &mdash; they&apos;ll create their account and appear in your dashboard instantly.
           </p>
-          <InviteClientDialog trigger={<Button className="mt-4"><UserPlus className="h-4 w-4 mr-2" />Invite First Client</Button>} />
+          <InviteClientDialog trigger={<Button className="mt-5"><UserPlus className="h-4 w-4 mr-2" />Invite First Client</Button>} />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
