@@ -44,6 +44,52 @@ export function NotificationBell({ coachId, initialUnreadLeads, initialUnreadChe
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  // Load existing unread notifications on mount
+  useEffect(() => {
+    async function loadExisting() {
+      const [{ data: leads }, { data: checkIns }] = await Promise.all([
+        supabase
+          .from("leads")
+          .select("id, full_name, email, created_at")
+          .eq("coach_id", coachId)
+          .eq("status", "new")
+          .order("created_at", { ascending: false })
+          .limit(10),
+        supabase
+          .from("check_ins")
+          .select("id, client_id, created_at")
+          .eq("coach_id", coachId)
+          .is("reviewed_at", null)
+          .order("created_at", { ascending: false })
+          .limit(10),
+      ]);
+
+      const initial: Notification[] = [
+        ...(leads ?? []).map((l) => ({
+          id: `lead-${l.id}`,
+          type: "new_lead" as const,
+          message: `New lead: ${l.full_name ?? l.email}`,
+          href: `/dashboard/leads/${l.id}`,
+          created_at: l.created_at,
+          read: false,
+        })),
+        ...(checkIns ?? []).map((c) => ({
+          id: `checkin-${c.id}`,
+          type: "new_checkin" as const,
+          message: "New check-in submitted",
+          href: `/dashboard/clients/${c.client_id}?tab=checkins`,
+          created_at: c.created_at,
+          read: false,
+        })),
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+       .slice(0, 20);
+
+      setNotifications(initial);
+      setUnread(initial.length);
+    }
+    loadExisting();
+  }, [coachId]);
+
   // Realtime: new leads
   useEffect(() => {
     const channel = supabase
