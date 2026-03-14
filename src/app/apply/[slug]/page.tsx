@@ -4,6 +4,7 @@ import { ApplyForm } from "@/components/shared/apply-form";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ utm_source?: string; ref?: string }>;
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -21,8 +22,10 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-export default async function ApplyPage({ params }: Props) {
+export default async function ApplyPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { utm_source, ref } = await searchParams;
+  const source = utm_source ?? ref ?? "application_page";
   const supabase = await createClient();
 
   const { data: coach } = await supabase
@@ -59,7 +62,7 @@ export default async function ApplyPage({ params }: Props) {
           <p className="text-slate-500 text-sm mb-6">
             Tell us about yourself and your goals. We&apos;ll be in touch within 24–48 hours.
           </p>
-          <ApplyForm coachId={coach.id} coachSlug={coach.slug} brandColor={coach.brand_color ?? "#3B82F6"} />
+          <ApplyForm coachId={coach.id} coachSlug={coach.slug} brandColor={coach.brand_color ?? "#3B82F6"} source={source} />
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-6">

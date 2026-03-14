@@ -7,6 +7,7 @@ const applySchema = z.object({
   full_name: z.string().min(1).max(200),
   email: z.string().email(),
   phone: z.string().optional().nullable(),
+  source: z.string().max(100).optional().nullable(),
   goals: z.string().min(1).max(2000),
   experience_level: z.string().optional().nullable(),
   availability: z.string().optional().nullable(),
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
         full_name: data.full_name,
         phone: data.phone,
         status: "new",
-        source: "application_page",
+        source: data.source ?? "application_page",
       })
       .select()
       .single();

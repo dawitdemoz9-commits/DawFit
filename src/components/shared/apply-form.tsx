@@ -11,9 +11,10 @@ interface ApplyFormProps {
   coachId: string;
   coachSlug: string;
   brandColor: string;
+  source: string;
 }
 
-export function ApplyForm({ coachId, coachSlug, brandColor }: ApplyFormProps) {
+export function ApplyForm({ coachId, coachSlug, brandColor, source }: ApplyFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +27,7 @@ export function ApplyForm({ coachId, coachSlug, brandColor }: ApplyFormProps) {
     const formData = new FormData(e.currentTarget);
     const body = {
       coach_id: coachId,
+      source,
       full_name: formData.get("full_name"),
       email: formData.get("email"),
       phone: formData.get("phone"),
