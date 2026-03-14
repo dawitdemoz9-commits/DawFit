@@ -35,7 +35,7 @@ interface ClientScheduleProps {
 
 const SESSION_TYPES = [
   { value: "coaching", label: "Coaching Call" },
-  { value: "check_in", label: "Check-In Call" },
+  { value: "1on1_workout", label: "1-on-1 Workout" },
   { value: "program_review", label: "Program Review" },
   { value: "other", label: "Other" },
 ];
