@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { FeaturePageLayout } from "@/components/marketing/feature-page-layout";
+import { ProgramBuilderMockup } from "@/components/marketing/mockups";
 import { ClipboardList, Zap, CalendarDays, Library } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -21,8 +22,7 @@ export default function ProgramBuilderPage() {
         </>
       }
       subheadline="Create professional multi-week training programs, add exercises from your library, and deliver them to clients with one click. No spreadsheets required."
-      screenshotLabel="Program Builder"
-      screenshotAccent="bg-gradient-to-br from-violet-900/40 to-slate-900"
+      Mockup={ProgramBuilderMockup}
       benefits={[
         {
           icon: CalendarDays,

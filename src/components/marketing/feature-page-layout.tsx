@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import { MarketingNav } from "./marketing-nav";
 import { type LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 
 interface Benefit {
   icon: LucideIcon;
@@ -21,8 +21,7 @@ interface FeaturePageLayoutProps {
   eyebrow: string;
   headline: ReactNode;
   subheadline: string;
-  screenshotLabel: string;
-  screenshotAccent: string;
+  Mockup: ComponentType;
   benefits: Benefit[];
   steps: Step[];
   ctaHeadline: string;
@@ -33,8 +32,7 @@ export function FeaturePageLayout({
   eyebrow,
   headline,
   subheadline,
-  screenshotLabel,
-  screenshotAccent,
+  Mockup,
   benefits,
   steps,
   ctaHeadline,
@@ -62,7 +60,7 @@ export function FeaturePageLayout({
         </Button>
       </section>
 
-      {/* Screenshot placeholder */}
+      {/* Product Mockup */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
         <div className="rounded-2xl border border-slate-700/60 overflow-hidden shadow-2xl shadow-black/40">
           {/* Browser chrome */}
@@ -76,18 +74,9 @@ export function FeaturePageLayout({
               </div>
             </div>
           </div>
-          {/* Screenshot area */}
-          <div
-            className={`h-80 sm:h-96 ${screenshotAccent} flex items-center justify-center relative overflow-hidden`}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-800/60 to-slate-900/80" />
-            <div className="relative text-center">
-              <div className="h-16 w-16 bg-indigo-500/20 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-indigo-500/30">
-                <Icon className="h-8 w-8 text-indigo-400" />
-              </div>
-              <p className="text-slate-300 font-semibold text-lg">{screenshotLabel}</p>
-              <p className="text-slate-500 text-sm mt-1">Dashboard Preview</p>
-            </div>
+          {/* Mockup area */}
+          <div className="h-80 sm:h-96">
+            <Mockup />
           </div>
         </div>
       </section>

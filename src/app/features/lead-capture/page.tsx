@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { FeaturePageLayout } from "@/components/marketing/feature-page-layout";
+import { LeadPipelineMockup } from "@/components/marketing/mockups";
 import { Megaphone, Link2, LayoutDashboard, UserCheck } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -21,8 +22,7 @@ export default function LeadCapturePage() {
         </>
       }
       subheadline="Get a shareable application page for your coaching business. Collect leads, review applications, and convert them to full clients — all without leaving DawFit."
-      screenshotLabel="Lead Pipeline"
-      screenshotAccent="bg-gradient-to-br from-amber-900/30 to-slate-900"
+      Mockup={LeadPipelineMockup}
       benefits={[
         {
           icon: Link2,

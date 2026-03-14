@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { FeaturePageLayout } from "@/components/marketing/feature-page-layout";
+import { DashboardMockup } from "@/components/marketing/mockups";
 import { Users, MessageSquare, TrendingUp, Bell } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -21,8 +22,7 @@ export default function ClientManagementPage() {
         </>
       }
       subheadline="Stop juggling spreadsheets and DMs. DawFit gives you a dedicated space for every client — programs, check-ins, messages, and progress, all in one dashboard."
-      screenshotLabel="Client Dashboard"
-      screenshotAccent="bg-gradient-to-br from-indigo-900/40 to-slate-900"
+      Mockup={DashboardMockup}
       benefits={[
         {
           icon: Users,

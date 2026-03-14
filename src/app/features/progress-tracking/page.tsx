@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { FeaturePageLayout } from "@/components/marketing/feature-page-layout";
+import { ProgressMockup } from "@/components/marketing/mockups";
 import { BarChart3, ClipboardCheck, TrendingUp, Camera } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -21,8 +22,7 @@ export default function ProgressTrackingPage() {
         </>
       }
       subheadline="Clients log workouts and submit weekly check-ins. You see the full picture — weights, body metrics, mood, and trends — so you can coach proactively."
-      screenshotLabel="Progress Dashboard"
-      screenshotAccent="bg-gradient-to-br from-emerald-900/30 to-slate-900"
+      Mockup={ProgressMockup}
       benefits={[
         {
           icon: ClipboardCheck,
