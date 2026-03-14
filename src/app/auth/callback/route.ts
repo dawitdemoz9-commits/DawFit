@@ -26,11 +26,13 @@ export async function GET(request: Request) {
   if (!sessionError) {
     const forwardedHost = request.headers.get("x-forwarded-host");
     const isLocalEnv = process.env.NODE_ENV === "development";
+    // Invited users must set a password before entering the app
+    const redirectPath = type === "invite" ? "/auth/set-password" : next;
     const destination = isLocalEnv
-      ? `${origin}${next}`
+      ? `${origin}${redirectPath}`
       : forwardedHost
-        ? `https://${forwardedHost}${next}`
-        : `${origin}${next}`;
+        ? `https://${forwardedHost}${redirectPath}`
+        : `${origin}${redirectPath}`;
     return NextResponse.redirect(destination);
   }
 

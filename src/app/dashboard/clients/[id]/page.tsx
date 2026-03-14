@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { ClientStatusActions } from "@/components/coach/client-status-actions";
 import { ReviewCheckInDialog } from "@/components/coach/review-check-in-dialog";
 import { AdaptiveSuggestionsPanel } from "@/components/coach/adaptive-suggestions-panel";
 import { TransformationStudio } from "@/components/coach/transformation-studio";
+import { ResendInviteButton } from "@/components/coach/resend-invite-button";
 import type { AdaptiveAnalysisOutput } from "@/lib/ai/adaptive-prompts";
 
 interface Props {
@@ -35,6 +37,12 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
   if (!client) notFound();
 
   const profile = Array.isArray(client.profiles) ? client.profiles[0] : client.profiles;
+
+  // Get client email + confirmed status from auth
+  const admin = createAdminClient();
+  const { data: authUser } = await admin.auth.admin.getUserById(id);
+  const clientEmail = authUser?.user?.email ?? null;
+  const clientConfirmed = !!authUser?.user?.confirmed_at;
 
   // Parallel fetch based on tab
   const [
@@ -153,6 +161,9 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {!clientConfirmed && clientEmail && (
+              <ResendInviteButton clientId={id} email={clientEmail} />
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link href={`/dashboard/messages?client=${id}`}>
                 <MessageSquare className="h-4 w-4 mr-1.5" />Message
