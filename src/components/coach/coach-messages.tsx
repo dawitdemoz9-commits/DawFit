@@ -139,11 +139,28 @@ export function CoachMessages({ coachId, conversations: initialConvs, newableCli
     const text = body.trim();
     setBody("");
 
-    await fetch("/api/messages/send", {
+    // Optimistic update — show immediately without waiting for Realtime
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: Message = {
+      id: tempId,
+      sender_id: coachId,
+      body: text,
+      sent_at: new Date().toISOString(),
+      read_at: null,
+    };
+    setMessages(prev => [...prev, optimistic]);
+
+    const res = await fetch("/api/messages/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ conversation_id: selectedId, body: text }),
     });
+    const json = await res.json();
+
+    // Replace temp with the real message from DB
+    if (json.message) {
+      setMessages(prev => prev.map(m => m.id === tempId ? json.message : m));
+    }
 
     setSending(false);
   }

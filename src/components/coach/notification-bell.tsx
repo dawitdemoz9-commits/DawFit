@@ -114,6 +114,48 @@ export function NotificationBell({ coachId, initialUnreadLeads, initialUnreadChe
           }
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        async (payload) => {
+          const msg = payload.new as { id: string; sender_id: string; conversation_id: string; body: string };
+          // Only notify if someone else sent it
+          if (msg.sender_id === coachId) return;
+          // Check if this conversation belongs to this coach
+          const { data: conv } = await supabase
+            .from("conversations")
+            .select("id, client_id")
+            .eq("id", msg.conversation_id)
+            .eq("coach_id", coachId)
+            .maybeSingle();
+          if (!conv) return;
+
+          const notification: Notification = {
+            id: `msg-${msg.id}`,
+            type: "new_lead",
+            message: `New message from client`,
+            href: `/dashboard/messages`,
+            created_at: new Date().toISOString(),
+            read: false,
+          };
+          setNotifications((prev) => [notification, ...prev].slice(0, 20));
+          setUnread((n) => n + 1);
+          toast.info("New message", {
+            description: msg.body.length > 60 ? msg.body.slice(0, 60) + "…" : msg.body,
+            action: { label: "Reply", onClick: () => window.location.href = "/dashboard/messages" },
+          });
+          if (typeof window !== "undefined" && Notification.permission === "granted") {
+            new Notification("New Message — DawFit", {
+              body: msg.body.length > 80 ? msg.body.slice(0, 80) + "…" : msg.body,
+              icon: "/favicon.ico",
+            });
+          }
+        }
+      )
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
