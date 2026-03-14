@@ -14,6 +14,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { CoachOnboarding, FirstClientBanner } from "@/components/onboarding/coach-onboarding";
+import { DashboardTasks } from "@/components/coach/dashboard-tasks";
 
 export default async function DashboardPage({
   searchParams,
@@ -27,6 +28,8 @@ export default async function DashboardPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
   // Parallel data fetch
   const [
     { count: clientCount },
@@ -38,6 +41,9 @@ export default async function DashboardPage({
     { data: recentLeads },
     { data: pendingDrafts },
     { data: coach },
+    { data: recentWorkoutLogs },
+    { data: unreviewedCheckIns },
+    { count: unreadMessageCount },
   ] = await Promise.all([
     supabase.from("clients").select("*", { count: "exact", head: true }).eq("coach_id", user.id),
     supabase.from("clients").select("*", { count: "exact", head: true }).eq("coach_id", user.id).eq("status", "active"),
@@ -64,15 +70,64 @@ export default async function DashboardPage({
       .order("created_at", { ascending: false })
       .limit(3),
     supabase.from("coaches").select("slug").eq("id", user.id).single(),
+    // Tasks: workout logs completed in last 24h
+    supabase
+      .from("workout_logs")
+      .select("id, client_id, logged_at, clients(profiles(full_name))")
+      .eq("coach_id", user.id)
+      .eq("status", "completed")
+      .gte("logged_at", oneDayAgo)
+      .order("logged_at", { ascending: false })
+      .limit(5),
+    // Tasks: unreviewed check-ins
+    supabase
+      .from("check_ins")
+      .select("id, client_id, submitted_at, clients(profiles(full_name))")
+      .eq("coach_id", user.id)
+      .is("reviewed_at", null)
+      .order("submitted_at", { ascending: false })
+      .limit(5),
+    // Tasks: unread messages from clients
+    supabase
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .is("read_at", null)
+      .neq("sender_id", user.id),
   ]);
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://dawfit.app";
   const hasProgram = (programCount ?? 0) > 0;
   const hasClient = (clientCount ?? 0) > 0;
-  // Proxy: if coach has both a client and a program, step 3 (assign) is considered done
   const hasProgramAssigned = hasClient && hasProgram;
   const firstClient = recentClients?.[recentClients.length - 1] ?? recentClients?.[0] ?? null;
   const showFirstClientBanner = clientCount === 1 && firstClient;
+
+  // Build task props
+  type ProfileJoin = { full_name: string | null } | { full_name: string | null }[] | null;
+  function getName(clients: unknown): string {
+    const c = clients as { profiles: ProfileJoin } | null;
+    if (!c) return "Client";
+    const p = Array.isArray(c.profiles) ? c.profiles[0] : c.profiles;
+    return p?.full_name ?? "Client";
+  }
+
+  const workoutLogTasks = (recentWorkoutLogs ?? []).map(log => ({
+    logId: log.id,
+    clientId: log.client_id,
+    clientName: getName(log.clients),
+    loggedAt: log.logged_at,
+  }));
+
+  const checkInTasks = (unreviewedCheckIns ?? []).map(ci => ({
+    checkInId: ci.id,
+    clientId: ci.client_id,
+    clientName: getName(ci.clients),
+    submittedAt: ci.submitted_at,
+  }));
+
+  const newLeadTasks = (recentLeads ?? [])
+    .filter(l => l.status === "new")
+    .map(l => ({ id: l.id, full_name: l.full_name, email: l.email }));
 
   const stats = [
     {
@@ -131,6 +186,15 @@ export default async function DashboardPage({
           appUrl={appUrl}
         />
       )}
+
+      {/* Today's Tasks */}
+      <DashboardTasks
+        recentWorkoutLogs={workoutLogTasks}
+        unreviewedCheckIns={checkInTasks}
+        unreadMessageCount={unreadMessageCount ?? 0}
+        pendingDraftCount={pendingDraftCount ?? 0}
+        newLeads={newLeadTasks}
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
