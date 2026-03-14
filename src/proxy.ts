@@ -3,6 +3,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 
 const PUBLIC_ROUTES = ["/", "/pricing", "/auth/login", "/auth/signup", "/auth/callback", "/auth/reset-password"];
 const APPLY_ROUTE_PATTERN = /^\/apply\//;
+const MARKETING_ROUTES = /^\/(features|compare)\//;
 const COACH_ROUTES = /^\/dashboard/;
 const CLIENT_ROUTES = /^\/client/;
 
@@ -13,6 +14,7 @@ export async function proxy(request: NextRequest) {
   if (
     PUBLIC_ROUTES.includes(pathname) ||
     APPLY_ROUTE_PATTERN.test(pathname) ||
+    MARKETING_ROUTES.test(pathname) ||
     pathname.startsWith("/api/leads") ||
     pathname.startsWith("/api/webhooks") ||
     pathname.startsWith("/_next") ||
