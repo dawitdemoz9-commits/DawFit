@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
     if (leadError || !lead) {
       console.error("Lead insert error:", leadError);
-      return NextResponse.json({ error: "Failed to submit application" }, { status: 500 });
+      return NextResponse.json({ error: leadError?.message ?? "Failed to insert lead" }, { status: 500 });
     }
 
     // Create application record
