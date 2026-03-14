@@ -9,7 +9,7 @@ export default async function ClientProgressPage() {
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [{ data: checkIns }, { data: workoutLogs }] = await Promise.all([
+  const [{ data: checkIns }, { data: workoutLogs }, { data: recentWorkouts }] = await Promise.all([
     // Weight + wellness over time
     supabase
       .from("check_ins")
@@ -17,7 +17,7 @@ export default async function ClientProgressPage() {
       .eq("client_id", user.id)
       .order("week_start_date", { ascending: true })
       .limit(12),
-    // Workout logs for volume calculation
+    // Workout logs for volume calculation (last 30d)
     supabase
       .from("workout_logs")
       .select("id, logged_at, status, duration_min, overall_rpe")
@@ -25,6 +25,14 @@ export default async function ClientProgressPage() {
       .eq("status", "completed")
       .gte("logged_at", thirtyDaysAgo)
       .order("logged_at", { ascending: true }),
+    // Last 5 completed workouts for summary list
+    supabase
+      .from("workout_logs")
+      .select("id, logged_at, duration_min, overall_rpe, workouts(title)")
+      .eq("client_id", user.id)
+      .eq("status", "completed")
+      .order("logged_at", { ascending: false })
+      .limit(5),
   ]);
 
   // Get set counts per workout log for volume chart
@@ -36,20 +44,13 @@ export default async function ClientProgressPage() {
         .in("workout_log_id", logIds)
     : { data: [] };
 
-  // Build weekly volume data (count sets per week)
+  // Compute sessions per week
   const weeklyVolume: Record<string, number> = {};
   for (const log of workoutLogs ?? []) {
     const weekStart = getWeekStart(log.logged_at);
     weeklyVolume[weekStart] = (weeklyVolume[weekStart] ?? 0) + 1;
   }
 
-  // Count exercise logs per workout log
-  const exerciseCountByLog: Record<string, number> = {};
-  for (const el of setCounts ?? []) {
-    exerciseCountByLog[el.workout_log_id] = (exerciseCountByLog[el.workout_log_id] ?? 0) + 1;
-  }
-
-  // Compute sessions per week
   const weeklySessionData = Object.entries(weeklyVolume).map(([week, count]) => ({
     week,
     sessions: count,
@@ -70,10 +71,32 @@ export default async function ClientProgressPage() {
     soreness: ci.soreness_level,
   }));
 
+  const recentWorkoutsSummary = (recentWorkouts ?? []).map(log => {
+    const workout = Array.isArray(log.workouts) ? log.workouts[0] : log.workouts;
+    return {
+      id: log.id,
+      title: (workout as { title?: string } | null)?.title ?? "Workout",
+      logged_at: log.logged_at,
+      duration_min: log.duration_min ?? null,
+      overall_rpe: log.overall_rpe ?? null,
+    };
+  });
+
+  const totalSessions30d = workoutLogs?.length ?? 0;
+  const avgRpe = workoutLogs && workoutLogs.length > 0
+    ? workoutLogs.filter(l => l.overall_rpe).reduce((sum, l) => sum + (l.overall_rpe ?? 0), 0) /
+      workoutLogs.filter(l => l.overall_rpe).length
+    : null;
+
+  const validWeights = weightData.slice(-2);
+  const weightChange = validWeights.length === 2
+    ? +(validWeights[1].weight - validWeights[0].weight).toFixed(1)
+    : null;
+
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-8">
+    <div className="min-h-screen bg-slate-900 p-5 max-w-3xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Progress</h1>
+        <h1 className="text-2xl font-bold text-white">Progress</h1>
         <p className="text-slate-500 text-sm mt-1">Your trends over time</p>
       </div>
 
@@ -81,6 +104,11 @@ export default async function ClientProgressPage() {
         weightData={weightData}
         wellnessData={wellnessData}
         weeklySessionData={weeklySessionData}
+        recentWorkouts={recentWorkoutsSummary}
+        totalSessions30d={totalSessions30d}
+        avgRpe={avgRpe}
+        weightChange={weightChange}
+        weightUnit={weightData[0]?.unit ?? "lbs"}
       />
     </div>
   );
