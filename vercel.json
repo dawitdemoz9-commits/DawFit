@@ -1,3 +1,0 @@
-{
-  "buildCommand": "NEXT_TURBOPACK=0 next build"
-}
