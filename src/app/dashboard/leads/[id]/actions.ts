@@ -115,7 +115,6 @@ export async function convertLeadToClient(leadId: string) {
       coach_id: user.id,
       status: "active",
       goals: application?.goals ?? null,
-      phone: lead.phone ?? null,
     });
   }
 
