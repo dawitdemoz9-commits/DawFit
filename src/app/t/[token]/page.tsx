@@ -191,15 +191,16 @@ export default async function TransformationSharePage({ params }: Props) {
               Apply to Work with {tx.coach_name}
             </Link>
           )}
-          <p className="text-xs text-slate-600 pt-2">
-            Powered by{" "}
-            <Link href={appUrl} className="text-slate-500 hover:text-slate-400 transition-colors">
-              DawFit
-            </Link>
-          </p>
         </div>
 
-      </div>
+        {/* Growth footer */}
+        <p className="text-center text-xs text-slate-400 mt-10">
+          <Link href="/" className="hover:text-indigo-500 transition-colors">
+            Built with DawFit
+          </Link>
+        </p>
+        </div>
+
     </div>
   );
 }
