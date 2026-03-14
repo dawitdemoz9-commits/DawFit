@@ -15,7 +15,14 @@ import {
 } from "lucide-react";
 import { CoachOnboarding, FirstClientBanner } from "@/components/onboarding/coach-onboarding";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ demo?: string }>;
+}) {
+  const { demo } = await searchParams;
+  const isDemo = demo === "true";
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
@@ -110,18 +117,20 @@ export default async function DashboardPage() {
       </div>
 
       {/* First client success banner */}
-      {showFirstClientBanner && (
+      {!isDemo && showFirstClientBanner && (
         <FirstClientBanner clientId={firstClient!.id} />
       )}
 
       {/* Onboarding progress */}
-      <CoachOnboarding
-        hasProgram={hasProgram}
-        hasClient={hasClient}
-        hasProgramAssigned={hasProgramAssigned}
-        coachSlug={coach?.slug ?? null}
-        appUrl={appUrl}
-      />
+      {!isDemo && (
+        <CoachOnboarding
+          hasProgram={hasProgram}
+          hasClient={hasClient}
+          hasProgramAssigned={hasProgramAssigned}
+          coachSlug={coach?.slug ?? null}
+          appUrl={appUrl}
+        />
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
