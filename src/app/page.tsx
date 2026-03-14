@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, BarChart3, ClipboardList, Megaphone, CheckCircle } from "lucide-react";
 import { MarketingNav } from "@/components/marketing/marketing-nav";
 import { ProductScreenshots } from "@/components/marketing/product-screenshots";
+import { SocialProof } from "@/components/marketing/social-proof";
+import { FinalCTA } from "@/components/marketing/final-cta";
 
 export default function HomePage() {
   return (
@@ -120,6 +122,12 @@ export default function HomePage() {
 
       {/* Product Screenshots */}
       <ProductScreenshots />
+
+      {/* Social Proof */}
+      <SocialProof />
+
+      {/* Final CTA */}
+      <FinalCTA />
 
       {/* Compare section */}
       <section className="max-w-3xl mx-auto px-6 pb-28 text-center">
