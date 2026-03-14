@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
+import { AuthHashRedirect } from "@/components/auth-hash-redirect";
 import "@/styles/globals.css";
 
 const geist = Geist({
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geist.variable} font-sans antialiased`}>
+        <AuthHashRedirect />
         {children}
         <Toaster position="top-right" richColors closeButton />
       </body>
