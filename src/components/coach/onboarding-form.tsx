@@ -147,6 +147,16 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
       </div>
 
       <div className="space-y-1.5">
+        <Label htmlFor="instagram_url">Instagram <span className="text-slate-400 font-normal">(optional)</span></Label>
+        <Input
+          id="instagram_url"
+          name="instagram_url"
+          type="url"
+          placeholder="https://instagram.com/yourhandle"
+        />
+      </div>
+
+      <div className="space-y-1.5">
         <Label htmlFor="website_url">Website <span className="text-slate-400 font-normal">(optional)</span></Label>
         <Input
           id="website_url"

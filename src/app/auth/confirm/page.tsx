@@ -4,15 +4,6 @@ import { useEffect } from "react";
 
 export default function ConfirmPage() {
   useEffect(() => {
-    // Must have an auth token in the URL hash to proceed
-    const hash = window.location.hash;
-    const hasToken = hash.includes("access_token") || hash.includes("token_hash");
-
-    if (!hasToken) {
-      window.location.replace("/auth/login");
-      return;
-    }
-
     async function handle() {
       const { createBrowserClient } = await import("@supabase/ssr");
       const supabase = createBrowserClient(
@@ -20,8 +11,30 @@ export default function ConfirmPage() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
 
-      // Supabase auto-processes the hash token when the client is created.
-      // Listen for the resulting auth event.
+      const hash = window.location.hash;
+      const search = window.location.search;
+      const params = new URLSearchParams(search);
+      const tokenHash = params.get("token_hash");
+      const type = params.get("type") as "recovery" | "invite" | "magiclink" | "signup" | null;
+
+      // PKCE flow — token is in the query string
+      if (tokenHash && type) {
+        const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+        if (error) {
+          window.location.replace("/auth/login?error=" + encodeURIComponent(error.message));
+          return;
+        }
+        window.location.replace("/auth/set-password");
+        return;
+      }
+
+      // Implicit flow — token is in the hash fragment
+      const hasHashToken = hash.includes("access_token") || hash.includes("token_hash");
+      if (!hasHashToken) {
+        window.location.replace("/auth/login");
+        return;
+      }
+
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (session && (event === "SIGNED_IN" || event === "PASSWORD_RECOVERY" || event === "USER_UPDATED")) {
           subscription.unsubscribe();
@@ -32,7 +45,7 @@ export default function ConfirmPage() {
       // Fallback: if no event fires in 6s the link is expired
       setTimeout(() => {
         subscription.unsubscribe();
-        window.location.replace("/auth/login?error=Link expired. Request a new one.");
+        window.location.replace("/auth/login?error=" + encodeURIComponent("Link expired. Request a new one."));
       }, 6000);
     }
 

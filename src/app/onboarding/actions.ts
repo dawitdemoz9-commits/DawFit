@@ -65,6 +65,7 @@ export async function completeOnboarding(formData: FormData) {
   const bio = formData.get("bio") as string;
   const brandColor = formData.get("brand_color") as string;
   const websiteUrl = formData.get("website_url") as string;
+  const instagramUrl = formData.get("instagram_url") as string;
 
   // Generate a clean slug from business name
   const baseSlug = slugify(businessName);
@@ -85,14 +86,16 @@ export async function completeOnboarding(formData: FormData) {
     slug = `${baseSlug}-${attempt}`;
   }
 
-  const { error } = await supabase.from("coaches").update({
+  const { error } = await supabase.from("coaches").upsert({
+    id: user.id,
     business_name: businessName,
     bio,
     brand_color: brandColor || "#3B82F6",
     website_url: websiteUrl || null,
+    instagram_url: instagramUrl || null,
     slug,
     onboarded_at: new Date().toISOString(),
-  }).eq("id", user.id);
+  }, { onConflict: "id" });
 
   if (error) {
     return { error: error.message };

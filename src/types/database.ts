@@ -24,9 +24,9 @@ export type Database = {
       >;
 
       coaches: T<
-        { id: string; slug: string; business_name: string | null; bio: string | null; brand_color: string | null; logo_url: string | null; website_url: string | null; stripe_account_id: string | null; stripe_customer_id: string | null; subscription_tier: "starter" | "pro" | "elite" | null; subscription_status: string | null; onboarded_at: string | null; settings: Json | null },
-        { id: string; slug: string; business_name?: string | null; bio?: string | null; brand_color?: string | null; logo_url?: string | null; website_url?: string | null; stripe_account_id?: string | null; stripe_customer_id?: string | null; subscription_tier?: "starter" | "pro" | "elite" | null; subscription_status?: string | null; onboarded_at?: string | null; settings?: Json | null },
-        { id?: string; slug?: string; business_name?: string | null; bio?: string | null; brand_color?: string | null; logo_url?: string | null; website_url?: string | null; stripe_account_id?: string | null; stripe_customer_id?: string | null; subscription_tier?: "starter" | "pro" | "elite" | null; subscription_status?: string | null; onboarded_at?: string | null; settings?: Json | null }
+        { id: string; slug: string; business_name: string | null; bio: string | null; brand_color: string | null; logo_url: string | null; website_url: string | null; instagram_url: string | null; stripe_account_id: string | null; stripe_customer_id: string | null; subscription_tier: "starter" | "pro" | "elite" | null; subscription_status: string | null; onboarded_at: string | null; settings: Json | null },
+        { id: string; slug: string; business_name?: string | null; bio?: string | null; brand_color?: string | null; logo_url?: string | null; website_url?: string | null; instagram_url?: string | null; stripe_account_id?: string | null; stripe_customer_id?: string | null; subscription_tier?: "starter" | "pro" | "elite" | null; subscription_status?: string | null; onboarded_at?: string | null; settings?: Json | null },
+        { id?: string; slug?: string; business_name?: string | null; bio?: string | null; brand_color?: string | null; logo_url?: string | null; website_url?: string | null; instagram_url?: string | null; stripe_account_id?: string | null; stripe_customer_id?: string | null; subscription_tier?: "starter" | "pro" | "elite" | null; subscription_status?: string | null; onboarded_at?: string | null; settings?: Json | null }
       >;
 
       clients: T<

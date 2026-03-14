@@ -1,0 +1,1 @@
+ALTER TABLE coaches ADD COLUMN IF NOT EXISTS instagram_url TEXT;
