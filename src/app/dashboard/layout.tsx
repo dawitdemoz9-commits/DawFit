@@ -8,21 +8,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   if (!user) redirect("/auth/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, full_name, avatar_url")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "coach") redirect("/client");
-
-  const { data: coach } = await supabase
-    .from("coaches")
-    .select("business_name, brand_color, onboarded_at")
-    .eq("id", user.id)
-    .single();
-
-  if (!coach?.onboarded_at) redirect("/onboarding");
+  const [{ data: profile }, { data: coach }] = await Promise.all([
+    supabase.from("profiles").select("role, full_name, avatar_url").eq("id", user.id).single(),
+    supabase.from("coaches").select("business_name, brand_color, onboarded_at").eq("id", user.id).single(),
+  ]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">

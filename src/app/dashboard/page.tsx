@@ -41,9 +41,6 @@ export default async function DashboardPage({
     { data: recentLeads },
     { data: pendingDrafts },
     { data: coach },
-    { data: recentWorkoutLogs },
-    { data: unreviewedCheckIns },
-    { count: unreadMessageCount },
   ] = await Promise.all([
     supabase.from("clients").select("*", { count: "exact", head: true }).eq("coach_id", user.id),
     supabase.from("clients").select("*", { count: "exact", head: true }).eq("coach_id", user.id).eq("status", "active"),
@@ -70,30 +67,11 @@ export default async function DashboardPage({
       .order("created_at", { ascending: false })
       .limit(3),
     supabase.from("coaches").select("slug").eq("id", user.id).single(),
-    // Tasks: workout logs completed in last 24h
-    supabase
-      .from("workout_logs")
-      .select("id, client_id, logged_at, clients(profiles(full_name))")
-      .eq("coach_id", user.id)
-      .eq("status", "completed")
-      .gte("logged_at", oneDayAgo)
-      .order("logged_at", { ascending: false })
-      .limit(5),
-    // Tasks: unreviewed check-ins
-    supabase
-      .from("check_ins")
-      .select("id, client_id, submitted_at, clients(profiles(full_name))")
-      .eq("coach_id", user.id)
-      .is("reviewed_at", null)
-      .order("submitted_at", { ascending: false })
-      .limit(5),
-    // Tasks: unread messages from clients
-    supabase
-      .from("messages")
-      .select("id", { count: "exact", head: true })
-      .is("read_at", null)
-      .neq("sender_id", user.id),
   ]);
+
+  const recentWorkoutLogs: never[] = [];
+  const unreviewedCheckIns: never[] = [];
+  const unreadMessageCount = 0;
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://dawfit.app";
   const hasProgram = (programCount ?? 0) > 0;

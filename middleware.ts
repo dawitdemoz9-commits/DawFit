@@ -10,14 +10,6 @@ export async function middleware(request: NextRequest) {
   const isDashboardRoute = pathname.startsWith("/dashboard");
   const isClientRoute = pathname.startsWith("/client");
 
-  // Redirect logged-in users away from auth pages
-  if (user && isAuthRoute) {
-    const profile = null; // role check handled post-login in actions.ts
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
-  }
-
   // Redirect unauthenticated users trying to access protected routes
   if (!user && (isDashboardRoute || isClientRoute)) {
     const url = request.nextUrl.clone();
