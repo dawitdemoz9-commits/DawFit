@@ -111,7 +111,7 @@ export function MarketingNav() {
         </div>
 
         <Link
-          href="#pricing"
+          href="/pricing"
           className="px-3 py-2 text-slate-300 hover:text-white text-sm font-medium transition-colors rounded-md hover:bg-slate-700/50"
         >
           Pricing
