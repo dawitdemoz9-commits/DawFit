@@ -24,14 +24,14 @@ const ENV_VARS: EnvVar[] = [
 
   // Stripe — required for billing
   { key: "STRIPE_SECRET_KEY",             required: true,  description: "Stripe secret key (sk_live_ or sk_test_)" },
-  { key: "STRIPE_WEBHOOK_SECRET",         required: true,  description: "Stripe webhook signing secret (whsec_...)" },
+  { key: "STRIPE_WEBHOOK_SECRET",         required: false, description: "Stripe webhook signing secret (whsec_...)" },
   { key: "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", required: true, description: "Stripe publishable key (pk_live_ or pk_test_)" },
   { key: "STRIPE_PRICE_STARTER",          required: true,  description: "Stripe Price ID for Starter plan" },
   { key: "STRIPE_PRICE_PRO",              required: true,  description: "Stripe Price ID for Pro plan" },
   { key: "STRIPE_PRICE_ELITE",            required: true,  description: "Stripe Price ID for Elite plan" },
 
   // Resend — required for email
-  { key: "RESEND_API_KEY",                required: true,  description: "Resend API key for transactional email" },
+  { key: "RESEND_API_KEY",                required: false, description: "Resend API key for transactional email" },
   { key: "RESEND_FROM_EMAIL",             required: false, description: "From address (defaults to noreply@dawfit.app)" },
 ];
 
