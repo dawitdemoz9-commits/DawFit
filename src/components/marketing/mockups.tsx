@@ -18,7 +18,7 @@ export function DashboardMockup() {
           {[
             {label:"Clients",val:"8",color:"bg-blue-100"},
             {label:"Leads",val:"3",color:"bg-violet-100"},
-            {label:"Drafts",val:"3",color:"bg-amber-100"},
+            {label:"Check-ins",val:"3",color:"bg-amber-100"},
             {label:"Programs",val:"5",color:"bg-emerald-100"},
           ].map(({label,val,color})=>(
             <div key={label} className="bg-white rounded border border-slate-200 p-1">
@@ -50,11 +50,11 @@ export function DashboardMockup() {
             ))}
           </div>
           <div className="bg-white rounded border border-slate-200 p-1.5 col-span-1">
-            <div className="text-slate-600 font-semibold mb-1">AI Drafts</div>
-            {["Adjustment","Analysis","Program"].map((n,i)=>(
+            <div className="text-slate-600 font-semibold mb-1">Check-ins</div>
+            {[{name:"Jordan S.",status:"bg-emerald-200"},{name:"Maya C.",status:"bg-emerald-200"},{name:"Carlos D.",status:"bg-amber-200"}].map(({name,status},i)=>(
               <div key={i} className="flex items-center justify-between py-0.5">
-                <span className="text-slate-700">{n}</span>
-                <div className="h-2 w-8 rounded-full bg-amber-200" />
+                <span className="text-slate-700">{name}</span>
+                <div className={`h-2 w-8 rounded-full ${status}`} />
               </div>
             ))}
           </div>
