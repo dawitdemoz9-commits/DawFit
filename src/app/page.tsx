@@ -130,7 +130,7 @@ export default function HomePage() {
       <FinalCTA />
 
       {/* Compare section */}
-      <section className="max-w-3xl mx-auto px-6 pb-28 text-center">
+      <section className="max-w-3xl mx-auto px-6 pb-16 text-center">
         <h2 className="text-xl font-bold text-white mb-2">How does DawFit compare?</h2>
         <p className="text-slate-400 text-sm mb-6">
           See how DawFit stacks up against other coaching platforms.
@@ -151,6 +151,28 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-700/50 bg-slate-900/60">
+        <div className="max-w-5xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="text-center sm:text-left">
+            <p className="text-white font-semibold mb-1">DawFit</p>
+            <p className="text-slate-400 text-sm">
+              Questions?{" "}
+              <a href="mailto:support@dawfit.app" className="text-indigo-400 hover:underline">
+                support@dawfit.app
+              </a>
+            </p>
+          </div>
+          <div className="flex items-center gap-5 text-sm text-slate-400 flex-wrap justify-center">
+            <Link href="/legal/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/legal/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/legal/refund" className="hover:text-white transition-colors">Refund Policy</Link>
+            <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+          </div>
+          <p className="text-slate-500 text-xs">© {new Date().getFullYear()} DawFit. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
