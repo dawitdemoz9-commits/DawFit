@@ -161,8 +161,8 @@ export default async function ClientDetailPage({ params, searchParams }: Props) 
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {!clientConfirmed && clientEmail && (
-              <ResendInviteButton clientId={id} email={clientEmail} />
+            {clientEmail && (
+              <ResendInviteButton clientId={id} email={clientEmail} confirmed={clientConfirmed} />
             )}
             <Button variant="outline" size="sm" asChild>
               <Link href={`/dashboard/messages?client=${id}`}>
