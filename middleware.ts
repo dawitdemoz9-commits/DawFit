@@ -1,20 +1,52 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-export async function middleware(request: NextRequest) {
-  const { supabaseResponse, user } = await updateSession(request);
+const PUBLIC_ROUTES = ["/", "/pricing", "/auth/login", "/auth/signup", "/auth/callback", "/auth/reset-password"];
+const APPLY_ROUTE_PATTERN = /^\/apply\//;
+const COACH_ROUTES = /^\/dashboard/;
+const CLIENT_ROUTES = /^\/client/;
 
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isAuthRoute = pathname.startsWith("/auth");
-  const isDashboardRoute = pathname.startsWith("/dashboard");
-  const isClientRoute = pathname.startsWith("/client");
+  if (
+    PUBLIC_ROUTES.includes(pathname) ||
+    APPLY_ROUTE_PATTERN.test(pathname) ||
+    pathname.startsWith("/api/leads") ||
+    pathname.startsWith("/api/webhooks") ||
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon")
+  ) {
+    return NextResponse.next({ request });
+  }
 
-  // Redirect unauthenticated users trying to access protected routes
-  if (!user && (isDashboardRoute || isClientRoute)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    return NextResponse.redirect(url);
+  const { supabaseResponse, user, supabase } = await updateSession(request);
+
+  if (!user) {
+    const loginUrl = new URL("/auth/login", request.url);
+    loginUrl.searchParams.set("redirectTo", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const role = profile?.role;
+
+  if (role === "coach" && CLIENT_ROUTES.test(pathname)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (role === "client" && COACH_ROUTES.test(pathname)) {
+    return NextResponse.redirect(new URL("/client", request.url));
+  }
+
+  if (pathname === "/") {
+    if (role === "coach") return NextResponse.redirect(new URL("/dashboard", request.url));
+    if (role === "client") return NextResponse.redirect(new URL("/client", request.url));
   }
 
   return supabaseResponse;
