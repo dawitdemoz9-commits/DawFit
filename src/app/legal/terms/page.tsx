@@ -64,7 +64,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-slate-900 mb-3">11. Contact</h2>
-            <p>Questions about these Terms? Email us at <a href="mailto:support@dawfit.app" className="text-violet-600 underline">support@dawfit.app</a>.</p>
+            <p>Questions about these Terms? Email us at <a href="mailto:dawitdemoz9@gmail.com" className="text-violet-600 underline">dawitdemoz9@gmail.com</a>.</p>
           </section>
 
         </div>

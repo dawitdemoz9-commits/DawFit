@@ -159,8 +159,8 @@ export default function HomePage() {
             <p className="text-white font-semibold mb-1">DawFit</p>
             <p className="text-slate-400 text-sm">
               Questions?{" "}
-              <a href="mailto:support@dawfit.app" className="text-indigo-400 hover:underline">
-                support@dawfit.app
+              <a href="mailto:dawitdemoz9@gmail.com" className="text-indigo-400 hover:underline">
+                dawitdemoz9@gmail.com
               </a>
             </p>
           </div>

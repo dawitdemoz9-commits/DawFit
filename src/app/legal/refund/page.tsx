@@ -13,33 +13,28 @@ export default function RefundPage() {
         <div className="prose prose-slate max-w-none space-y-8 text-slate-700 leading-relaxed">
 
           <section>
-            <h2 className="text-xl font-semibold text-slate-900 mb-3">Cancellations</h2>
-            <p>You may cancel your DawFit subscription at any time through your account settings (Dashboard → Settings → Billing → Manage Subscription). Cancellation takes effect at the end of your current billing period. You will retain full access to the platform until that date.</p>
+            <h2 className="text-xl font-semibold text-slate-900 mb-3">14-Day Money-Back Guarantee</h2>
+            <p>If you are not satisfied with DawFit within the first 14 days of your paid subscription, contact us for a full refund — no questions asked. This applies to first-time subscribers only.</p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-slate-900 mb-3">Refunds</h2>
-            <p>DawFit subscriptions are billed monthly. We do not offer prorated refunds for partial months. If you cancel mid-cycle, you keep access until the end of that billing period with no further charges.</p>
-            <p className="mt-3">Exceptions are made for:</p>
-            <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li>Duplicate charges or billing errors — refunded in full upon verification</li>
-              <li>Charges made after a confirmed cancellation — refunded in full</li>
-            </ul>
+            <h2 className="text-xl font-semibold text-slate-900 mb-3">Cancellations</h2>
+            <p>You may cancel your subscription at any time from Dashboard → Settings → Billing → Manage Subscription. Cancellation takes effect at the end of your current billing period. You retain full access until that date and will not be charged again.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-slate-900 mb-3">After the 14-Day Period</h2>
+            <p>After the initial 14-day window, subscriptions are non-refundable. If you cancel mid-cycle you keep access through the end of that billing period with no further charges, but no partial-month refund is issued.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-slate-900 mb-3">Billing Errors</h2>
+            <p>Duplicate charges or charges made after a confirmed cancellation are always refunded in full. Contact us and we will resolve it within 2 business days.</p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-slate-900 mb-3">How to Request a Refund</h2>
-            <p>Email us at <a href="mailto:support@dawfit.app" className="text-violet-600 underline">support@dawfit.app</a> with your account email and a description of the issue. We will respond within 2 business days. Approved refunds are processed within 5–10 business days to your original payment method.</p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-slate-900 mb-3">Free Trial</h2>
-            <p>If DawFit offers a free trial period, no charge is made during the trial. You may cancel before the trial ends without being billed.</p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-slate-900 mb-3">Questions</h2>
-            <p>Contact us at <a href="mailto:support@dawfit.app" className="text-violet-600 underline">support@dawfit.app</a>.</p>
+            <p>Email <a href="mailto:dawitdemoz9@gmail.com" className="text-violet-600 underline">dawitdemoz9@gmail.com</a> with your account email and the reason for your request. Approved refunds are returned to your original payment method within 5–10 business days.</p>
           </section>
 
         </div>
