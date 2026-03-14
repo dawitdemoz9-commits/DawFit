@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { UserPlus, ChevronRight, X, CheckCheck } from "lucide-react";
-import { updateLeadStatus, convertLeadToClient } from "@/app/dashboard/leads/[id]/actions";
+import { UserPlus, ChevronRight, X, CheckCheck, Trash2 } from "lucide-react";
+import { updateLeadStatus, convertLeadToClient, deleteLead } from "@/app/dashboard/leads/[id]/actions";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "converted" | "rejected";
 
@@ -26,6 +26,7 @@ interface LeadActionsProps {
 export function LeadActions({ leadId, status, nextStatus, convertedClientId }: LeadActionsProps) {
   const [pending, setPending] = useState<string | null>(null);
   const [confirmConvert, setConfirmConvert] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleStatusUpdate(newStatus: LeadStatus) {
@@ -158,6 +159,35 @@ export function LeadActions({ leadId, status, nextStatus, convertedClientId }: L
           {pending === "rejected" ? "…" : "Reject"}
         </Button>
       </div>
+
+      {/* Delete */}
+      {!confirmDelete ? (
+        <button
+          className="text-xs text-slate-300 hover:text-red-400 transition-colors flex items-center gap-1"
+          onClick={() => setConfirmDelete(true)}
+        >
+          <Trash2 className="h-3 w-3" />
+          Delete lead
+        </button>
+      ) : (
+        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+          <p className="text-sm text-red-700 flex-1">Permanently delete this lead?</p>
+          <Button
+            size="sm"
+            className="bg-red-600 hover:bg-red-700 text-white flex-shrink-0"
+            disabled={pending === "delete"}
+            onClick={async () => {
+              setPending("delete");
+              await deleteLead(leadId);
+            }}
+          >
+            {pending === "delete" ? "Deleting…" : "Delete"}
+          </Button>
+          <Button size="sm" variant="ghost" className="flex-shrink-0" onClick={() => setConfirmDelete(false)}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

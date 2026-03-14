@@ -8,6 +8,21 @@ import { sendLeadConversionEmail } from "@/lib/email";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "converted" | "rejected";
 
+export async function deleteLead(leadId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/login");
+
+  await supabase
+    .from("leads")
+    .delete()
+    .eq("id", leadId)
+    .eq("coach_id", user.id);
+
+  revalidatePath("/dashboard/leads");
+  redirect("/dashboard/leads");
+}
+
 export async function updateLeadStatus(leadId: string, status: LeadStatus) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
