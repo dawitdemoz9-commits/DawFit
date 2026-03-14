@@ -3,16 +3,18 @@
 -- ============================================================
 -- Creates a realistic demo coach account for marketing screenshots.
 -- Demo coach login: demo@dawfit.app / DawFitDemo2024!
+-- Admin login:      dawit@admin / dawit123
 --
 -- Run AFTER migrations and seed.sql:
 --   psql $DATABASE_URL < supabase/seed.sql
 --   psql $DATABASE_URL < supabase/seed-demo.sql
 --
 -- To reset:
---   DELETE FROM auth.users WHERE email = 'demo@dawfit.app';
+--   DELETE FROM auth.users WHERE email IN ('demo@dawfit.app', 'dawit@admin');
 -- ============================================================
 
 -- Static UUIDs for demo accounts (predictable for screenshots)
+-- Admin:     d0000000-0000-0000-0000-000000000000
 -- Coach:     a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
 -- Clients:   c0000000-0000-0000-0000-00000000000{1..8}
 -- Programs:  b0000000-0000-0000-0000-00000000000{1..3}
@@ -25,6 +27,17 @@ INSERT INTO auth.users (
   id, instance_id, email, encrypted_password, email_confirmed_at,
   created_at, updated_at, raw_app_meta_data, raw_user_meta_data, aud, role
 ) VALUES
+  -- Admin (Dawit)
+  (
+    'd0000000-0000-0000-0000-000000000000',
+    '00000000-0000-0000-0000-000000000000',
+    'dawit@admin',
+    crypt('dawit123', gen_salt('bf')),
+    NOW(), NOW(), NOW(),
+    '{"provider":"email","providers":["email"],"role":"admin"}',
+    '{"full_name":"Dawit"}',
+    'authenticated', 'authenticated'
+  ),
   -- Demo coach
   (
     'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
