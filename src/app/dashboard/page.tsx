@@ -73,7 +73,7 @@ export default async function DashboardPage({
     supabase.from("coaches").select("slug").eq("id", user.id).single(),
   ]);
 
-  const recentWorkoutLogs: never[] = [];
+  const recentWorkoutLogs: { id: string; client_id: string; logged_at: string; clients: unknown }[] = [];
   const unreviewedCheckIns: never[] = [];
   const unreadMessageCount = 0;
 
