@@ -15,6 +15,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     supabase.from("check_ins").select("*", { count: "exact", head: true }).eq("coach_id", user.id).is("reviewed_at", null),
   ]);
 
+  // Clients must not access the coach dashboard
+  if (profile?.role === "client") redirect("/client");
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       <CoachSidebar

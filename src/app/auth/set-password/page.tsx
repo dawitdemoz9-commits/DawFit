@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,24 @@ export default function SetPasswordPage() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
+
+  // Wait for an active session before allowing password update
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setSessionReady(true);
+      } else {
+        // No session — send back to login
+        router.replace("/auth/login?error=Session expired. Request a new link.");
+      }
+    });
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,7 +54,26 @@ export default function SetPasswordPage() {
       return;
     }
 
-    router.push("/client");
+    // Redirect based on role
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      router.push(profile?.role === "coach" ? "/dashboard" : "/client");
+    } else {
+      router.push("/auth/login");
+    }
+  }
+
+  if (!sessionReady) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <p className="text-slate-500 text-sm">Verifying your session…</p>
+      </div>
+    );
   }
 
   return (
@@ -51,8 +83,8 @@ export default function SetPasswordPage() {
           <div className="inline-flex items-center justify-center w-12 h-12 bg-indigo-500 rounded-xl mb-4">
             <span className="text-white font-bold text-lg">D</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Create your password</h1>
-          <p className="text-slate-500 text-sm mt-2">Set a password to access your coaching portal.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Set your password</h1>
+          <p className="text-slate-500 text-sm mt-2">Choose a password to secure your account.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
