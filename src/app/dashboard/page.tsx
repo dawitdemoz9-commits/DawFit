@@ -74,7 +74,7 @@ export default async function DashboardPage({
   ]);
 
   const recentWorkoutLogs: { id: string; client_id: string; logged_at: string; clients: unknown }[] = [];
-  const unreviewedCheckIns: never[] = [];
+  const unreviewedCheckIns: { id: string; client_id: string; submitted_at: string; clients: unknown }[] = [];
   const unreadMessageCount = 0;
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://dawfit.app";
