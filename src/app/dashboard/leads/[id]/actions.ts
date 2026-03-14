@@ -98,7 +98,7 @@ export async function convertLeadToClient(leadId: string) {
       lead.email,
       {
         data: { role: "client", full_name: lead.full_name ?? "" },
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/auth/callback?next=/client`,
+        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/auth/confirm`,
       }
     );
 

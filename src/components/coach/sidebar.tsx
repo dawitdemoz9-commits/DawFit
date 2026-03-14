@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -15,6 +16,8 @@ import {
   Settings,
   Sparkles,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,11 +45,17 @@ interface SidebarProps {
   brandColor: string;
 }
 
-export function CoachSidebar({ coachName, coachAvatar, businessName, brandColor }: SidebarProps) {
+function SidebarContent({
+  coachName,
+  coachAvatar,
+  businessName,
+  brandColor,
+  onNavClick,
+}: SidebarProps & { onNavClick?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 min-h-screen bg-slate-900 flex flex-col">
+    <>
       {/* Brand */}
       <div className="p-4 border-b border-slate-800">
         <div className="flex items-center gap-3">
@@ -64,13 +73,14 @@ export function CoachSidebar({ coachName, coachAvatar, businessName, brandColor 
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-0.5">
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {navItems.map(({ href, label, icon: Icon, exact }) => {
           const isActive = exact ? pathname === href : pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
+              onClick={onNavClick}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                 isActive
@@ -109,6 +119,68 @@ export function CoachSidebar({ coachName, coachAvatar, businessName, brandColor 
           </form>
         </div>
       </div>
-    </aside>
+    </>
+  );
+}
+
+export function CoachSidebar(props: SidebarProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-64 min-h-screen bg-slate-900 flex-col flex-shrink-0">
+        <SidebarContent {...props} />
+      </aside>
+
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 py-3">
+        <div className="flex items-center gap-2">
+          <div
+            className="h-7 w-7 rounded-md flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+            style={{ backgroundColor: props.brandColor }}
+          >
+            {getInitials(props.businessName || "D")}
+          </div>
+          <span className="text-white font-semibold text-sm">{props.businessName || "DawFit"}</span>
+        </div>
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="text-slate-400 hover:text-white p-1"
+          aria-label="Open menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Mobile drawer overlay */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-black/60"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile drawer */}
+      <aside
+        className={cn(
+          "md:hidden fixed top-0 left-0 h-full w-64 bg-slate-900 flex flex-col z-50 transition-transform duration-200",
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex items-center justify-end p-3 border-b border-slate-800">
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="text-slate-400 hover:text-white p-1"
+            aria-label="Close menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <SidebarContent {...props} onNavClick={() => setMobileOpen(false)} />
+        </div>
+      </aside>
+    </>
   );
 }

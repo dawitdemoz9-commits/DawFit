@@ -146,7 +146,7 @@ export async function inviteClient(formData: FormData) {
         role: "client",
         coach_id: user.id,
       },
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/client`,
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
     }
   );
 
@@ -155,6 +155,13 @@ export async function inviteClient(formData: FormData) {
   }
 
   if (invited.user) {
+    // Create profile row first (clients FK references profiles)
+    await serviceSupabase.from("profiles").upsert({
+      id: invited.user.id,
+      role: "client",
+      full_name: fullName,
+    });
+
     // Create client record
     const { error: clientError } = await serviceSupabase.from("clients").insert({
       id: invited.user.id,

@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const PUBLIC_ROUTES = ["/", "/pricing", "/auth/login", "/auth/signup", "/auth/callback", "/auth/reset-password", "/auth/set-password"];
+const PUBLIC_ROUTES = ["/", "/pricing", "/auth/login", "/auth/signup", "/auth/callback", "/auth/reset-password", "/auth/set-password", "/auth/confirm"];
 const APPLY_ROUTE_PATTERN = /^\/apply\//;
 const MARKETING_ROUTES = /^\/(features|compare|legal)\//;
 const COACH_ROUTES = /^\/dashboard/;
