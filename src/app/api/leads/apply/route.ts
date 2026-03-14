@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
 const applySchema = z.object({
@@ -29,8 +29,8 @@ export async function POST(request: Request) {
 
     const data = parsed.data;
 
-    // Use server client (no user auth needed — this is a public endpoint)
-    const supabase = await createClient();
+    // Use service client — public endpoint, bypasses RLS for reliable inserts
+    const supabase = await createServiceClient();
 
     // Verify coach exists
     const { data: coach } = await supabase

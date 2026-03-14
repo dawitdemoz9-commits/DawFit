@@ -105,8 +105,16 @@ export async function completeOnboarding(formData: FormData) {
   }
 
   // Seed specialty exercises into coach's personal library
-  const specialty = (formData.get("specialty") as string) || "general";
-  const specialtyExercises = SPECIALTY_EXERCISES[specialty] ?? [];
+  const specialtyRaw = (formData.get("specialty") as string) || "general";
+  const specialties = specialtyRaw.split(",").map((s) => s.trim()).filter(Boolean);
+  const seen = new Set<string>();
+  const specialtyExercises = specialties
+    .flatMap((s) => SPECIALTY_EXERCISES[s] ?? [])
+    .filter((ex) => {
+      if (seen.has(ex.name)) return false;
+      seen.add(ex.name);
+      return true;
+    });
   if (specialtyExercises.length > 0) {
     await supabase.from("exercises").insert(
       specialtyExercises.map((ex) => ({

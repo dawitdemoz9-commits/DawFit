@@ -39,12 +39,20 @@ function SubmitButton() {
 export function OnboardingForm({ defaultName }: { defaultName: string }) {
   const [error, setError] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState(BRAND_COLORS[0]);
-  const [selectedSpecialty, setSelectedSpecialty] = useState("general");
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(["general"]);
+
+  function toggleSpecialty(value: string) {
+    setSelectedSpecialties((prev) =>
+      prev.includes(value)
+        ? prev.length === 1 ? prev : prev.filter((s) => s !== value)
+        : [...prev, value]
+    );
+  }
 
   async function handleAction(formData: FormData) {
     setError(null);
     formData.set("brand_color", selectedColor);
-    formData.set("specialty", selectedSpecialty);
+    formData.set("specialty", selectedSpecialties.join(","));
     const result = await completeOnboarding(formData);
     if (result?.error) {
       setError(result.error);
@@ -93,25 +101,29 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
 
       <div className="space-y-2">
         <Label>Coaching specialty</Label>
-        <p className="text-xs text-slate-400">We&apos;ll seed your exercise library with relevant exercises</p>
+        <p className="text-xs text-slate-400">Select all that apply — we&apos;ll seed your exercise library accordingly</p>
         <div className="grid grid-cols-1 gap-2">
-          {SPECIALTIES.map((s) => (
-            <button
-              key={s.value}
-              type="button"
-              onClick={() => setSelectedSpecialty(s.value)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-sm font-medium transition-colors text-left ${
-                selectedSpecialty === s.value
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-              }`}
-            >
-              <span className="text-lg">{s.emoji}</span>
-              {s.label}
-            </button>
-          ))}
+          {SPECIALTIES.map((s) => {
+            const selected = selectedSpecialties.includes(s.value);
+            return (
+              <button
+                key={s.value}
+                type="button"
+                onClick={() => toggleSpecialty(s.value)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-sm font-medium transition-colors text-left ${
+                  selected
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                }`}
+              >
+                <span className="text-lg">{s.emoji}</span>
+                <span className="flex-1">{s.label}</span>
+                {selected && <span className="text-blue-500 text-xs font-semibold">✓</span>}
+              </button>
+            );
+          })}
         </div>
-        <input type="hidden" name="specialty" value={selectedSpecialty} />
+        <input type="hidden" name="specialty" value={selectedSpecialties.join(",")} />
       </div>
 
       <div className="space-y-2">

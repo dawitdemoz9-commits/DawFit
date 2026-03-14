@@ -14,10 +14,12 @@ import {
   BarChart3,
   Settings,
   Sparkles,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
+import { signOut } from "@/app/auth/actions";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -96,6 +98,15 @@ export function CoachSidebar({ coachName, coachAvatar, businessName, brandColor 
             <p className="text-white text-sm font-medium truncate">{coachName}</p>
             <p className="text-slate-400 text-xs">Coach</p>
           </div>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="text-slate-400 hover:text-white transition-colors p-1 rounded"
+              title="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </form>
         </div>
       </div>
     </aside>
