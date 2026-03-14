@@ -157,7 +157,9 @@ export async function approveProgramDraft(draftId: string) {
       }
 
       if (weInserts.length > 0) {
-        await supabase.from("workout_exercises").insert(weInserts);
+        await supabase.from("workout_exercises").insert(
+          weInserts.filter((w): w is typeof w & { exercise_id: string } => w.exercise_id !== null)
+        );
       }
     }
   }
